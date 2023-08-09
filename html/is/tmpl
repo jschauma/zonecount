@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .is</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .is</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Iceland &#127470;&#127480;</p>
+  <p>Source: Published stats found <a href="https://www.isnic.is/en/tolur">here</a></p>
+  <div>
+    <canvas id="is"></canvas>
+  </div>
+  <noscript>
+    <img src="is.png" alt="Zone stats for .is" width="1024">
+  </noscript>
+
+  <p><a href="is.png">Static gnuplot image for .is</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_is = document.getElementById('is');
+  new Chart(ctx_is, {
+          type: 'line',
+          data: {
+            labels: data_is.labels,
+            datasets: [{
+              data: data_is.data,
+              label: '.is',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

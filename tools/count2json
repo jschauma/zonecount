@@ -1,0 +1,63 @@
+#! /bin/sh
+#
+# Originally written by Jan Schaumann
+# <jschauma@netmeister.org> in June 2023.
+#
+# This script is part of the glue to generate TLD zone
+# stats (see https://www.netmeister.org/blog/tldstats.html).
+# Specifically, it generates the json file with all
+# counts for all TLDs.
+set -eu
+
+DIR="${1:?"Usage: $0 dir"}"
+
+printOneFile() {
+	local file="${1}"
+	local comma first k v
+
+	oIFS="${IFS}"
+	IFS="
+"
+	first=0
+	comma=""
+	for line in $(cat ${file}); do
+		if [ ${first} -gt 0 ]; then
+			comma=",\n"
+		fi
+		v=${line#* }
+		k=${line% *}
+		printf "${comma}      \"$k\" : \"$v\""
+		first=1
+	done
+
+	IFS="${oIFS}"
+}
+
+cd ${DIR}
+
+DATE="$(date +%Y%m%d)"
+
+cat <<EOF
+{
+  "about" : "https://www.netmeister.org/tldstats/",
+  "date" : "${DATE}",
+  "tlds" : {
+EOF
+first=0
+comma=""
+for f in *; do
+	if [ ${first} -gt 0 ]; then
+		comma=",\n"
+	fi
+	if [ "${f}" = "all-tlds" ]; then
+		continue
+	fi
+	printf "${comma}    \"${f}\" : {\n"
+	printOneFile $f
+	printf "\n    }"
+	first=1
+done
+
+printf "\n  },\n  \"total\" : {\n"
+printOneFile all-tlds
+printf "\n  }\n}\n"

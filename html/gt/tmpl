@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .gt</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .gt</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Guatemala &#127468;&#127481;</p>
+  <p>Source: Published stats found <a href="https://www.gt/estadisticas/">here</a></p>
+  <div>
+    <canvas id="gt"></canvas>
+  </div>
+  <noscript>
+    <img src="gt.png" alt="Zone stats for .gt" width="1024">
+  </noscript>
+
+  <p><a href="gt.png">Static gnuplot image for .gt</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_gt = document.getElementById('gt');
+  new Chart(ctx_gt, {
+          type: 'line',
+          data: {
+            labels: data_gt.labels,
+            datasets: [{
+              data: data_gt.data,
+              label: '.gt',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

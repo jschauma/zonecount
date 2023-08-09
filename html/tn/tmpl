@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .tn</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .tn</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Tunisia &#127481;&#127475;; see also <a href="../xn--pgbs0dh/">.xn--pgbs0dh</a></p>
+  <p>Source: Published stats found <a href="https://www.registre.tn/fr/index.php?rub=262&srub=329">here</a></p>
+  <div>
+    <canvas id="tn"></canvas>
+  </div>
+  <noscript>
+    <img src="tn.png" alt="Zone stats for .tn" width="1024">
+  </noscript>
+
+  <p><a href="tn.png">Static gnuplot image for .tn</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_tn = document.getElementById('tn');
+  new Chart(ctx_tn, {
+          type: 'line',
+          data: {
+            labels: data_tn.labels,
+            datasets: [{
+              data: data_tn.data,
+              label: '.tn',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

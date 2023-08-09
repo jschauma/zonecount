@@ -1,0 +1,64 @@
+<html lang="en">
+  <head>
+    <title>Zone stats: # of domains in .xn--fiqs8s</title>
+    <meta http-equiv="content-type" content= "text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .xn--fiqs8s</h1>
+
+  <hr style="border-style:solid; width:100%;">
+  <p>Internationalized ccTLD <tt>.中国</tt> for China &#127464;&#127475; (see also: <a href="../cn/">.cn</a>)</p>
+  <p>Source: Manually compiled stats from <a href="https://www.cnnic.com.cn/IDR/ReportDownloads/">CCNIC's biannual reports</a>.</p>
+  <div>
+    <canvas id="xn__fiqs8s"></canvas>
+  </div>
+  <noscript>
+    <img src="xn__fiqs8s.png" alt="Zone stats for .xn--fiqs8s" width="1024">
+  </noscript>
+
+  <p><a href="xn__fiqs8s.png">Static gnuplot image for .xn--fiqs8s</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr style="border-style:solid; width:75%;">
+
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_xn__fiqs8s = document.getElementById('xn__fiqs8s');
+  new Chart(ctx_xn__fiqs8s, {
+          type: 'line',
+          data: {
+            labels: data_xn__fiqs8s.labels,
+            datasets: [{
+              data: data_xn__fiqs8s.data,
+              label: '.xn__fiqs8s',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

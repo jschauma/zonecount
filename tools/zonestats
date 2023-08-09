@@ -1,0 +1,2105 @@
+#! /bin/sh
+#
+# Written by Jan Schaumann <jschauma@netmeister.org>
+# in June 2023.
+#
+# This script pulls TLD zonefiles from various
+# locations and extracts the count of number of
+# domains found in them.  It also fetches statistics
+# from different registries' websites.
+#
+# See also:
+# https://www.netmeister.org/tldstats/
+# https://www.netmeister.org/blog/tldstats/
+# https://github.com/jschauma/tld-zoneinfo
+#
+# Requirements: curl, jq, perl
+# https://github.com/lanrat/czds,
+# https://www.nlnetlabs.nl/projects/ldns/about/ (ldns-walk)
+#
+# Copyright 2023, Jan Schaumann <jschauma@netmeister.org>
+# 
+# Redistribution and use in source and binary forms,
+# with or without modification, are permitted provided
+# that the following conditions are met:
+# 
+# 1. Redistributions of source code must retain the
+# above copyright notice, this list of conditions and
+# the following disclaimer.
+# 
+# 2. Redistributions in binary form must reproduce the
+# above copyright notice, this list of conditions and
+# the following disclaimer in the documentation and/or
+# other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+# CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+# THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+# IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+# USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+set -eu
+umask 077
+
+export XZ_DEFAULTS="--memlimit=225MiB"
+
+DATE=$(date +%Y%m%d)
+FORCE=0
+PASSWDFILE="/home/jschauma/.icann"
+PROGNAME="${0##*/}"
+TDIR=""
+VERBOSITY=0
+
+ALLOWED_TYPES="all cctlds counts gtlds html nsec stats z2n"
+TYPE=""
+
+BASEDIR="/misc/dnsdata/zonecount"
+COUNTDIR="${BASEDIR}/counts"
+ZONESDIR="${BASEDIR}/zonefiles"
+NAMESDIR="${BASEDIR}/names"
+HTMLDIR="${BASEDIR}/html"
+
+# nsec walking seems more reliable
+#sl. ns2.neoip.com.
+
+AXFR=". f.root-servers.net.
+arpa. $(dig +short ns arpa. | grep -v '^a.ns.arpa' | tail -1)
+cd. ns-root-22.scpt-network.net.
+cv. cv01.dns.pt.
+er. zaranew.noc.net.er.
+ee. zone.internet.ee.
+fj. ns1.fj.
+gp. ns2.nic.gp.
+mw. domwe.sdn.mw.
+nu. zonedata.iis.se.
+ni. ns.ideay.net.ni.
+se. zonedata.iis.se.
+xn--54b7fta0cc. bayanno.btcl.net.bd.
+xn--ygbi2ammx. ns1.gov.ps."
+
+FORCED_ZONES="com net nu se"
+
+HAVE_STATS="am.
+ar.
+at.
+au.
+az.
+ba.
+be.
+bn.
+br.
+ci.
+cl.
+cn.
+com.
+cw.
+cz.
+de.
+dk.
+do.
+dz.
+ec.
+eu.
+es.
+fi.
+fo.
+fr.
+ge.
+gt.
+hk.
+hr.
+ht.
+hu.
+id.
+ie.
+il.
+ir.
+is.
+it.
+jo.
+jp.
+ke.
+kr.
+lt.
+lu.
+ma.
+mk.
+net.
+nl.
+no.
+nu.
+pl.
+pt.
+rs.
+ru.
+sa.
+se.
+sg.
+si.
+sk.
+su.
+sv.
+th.
+tn.
+tr.
+tw.
+tz.
+ua.
+uk.
+uy.
+uz.
+vn.
+xn--fiqs8s.
+za."
+
+NSEC_ZONES="ax.
+bd.
+bt.
+cy.
+gdn.
+gn.
+lb.
+lk.
+lr.
+mc.
+pr.
+sl.
+ve.
+xn--80ao21a.
+xn--fzc2c9e2c.
+xn--l1acc.
+xn--xkc2al3hye2a."
+
+NSEC_AUTH_ZONES="ns2.kg. kg.
+ns2.nic.kz. kz."
+
+NSEC_SUBDOMAINS="lb.
+sl."
+
+SUBDOMAINS_ER="com edu gov ind mil net org"
+SUBDOMAINS_GP="asso com edu net org"
+SUBDOMAINS_LB="com edu gov net org"
+SUBDOMAINS_MW="ac co com coop edu gov int museum net org"
+SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
+SUBDOMAINS_SL="com edu gov net org"
+
+NOFILL_DOMAINS="cn xn--fiqs8s"
+
+###
+### Functions
+###
+
+axfr() {
+	local domain=${1}
+	local ns=${2}
+	local keyfile=${3:-""}
+	local subdomain=${4:-""}
+	local kflag=""
+	local oldsoa=0
+	local newsoa=0
+	local out=${domain%%.}.xz
+
+	verbose "${subdomain:+${subdomain}.}${domain} ..."
+
+	if excludeForced "${domain%%.}"; then
+		verbose "Excluding ${domain}" 2
+		return
+	fi
+
+	verbose "${subdomain:+${subdomain}.}${domain} from ${ns}" 2
+
+	if [ -z "${subdomain}" ] && [ -f "${ZONESDIR}/${out}" ]; then
+		if [ ${FORCE} -eq 0 ]; then
+			verbose "Already fetched." 3
+			return
+		fi
+		oldsoa=$(zcat ${ZONESDIR}/${out} | awk '/[ 	][sS][oO][aA][ 	]/ { print $7; exit; }')
+		newsoa=$(dig +noall +answer SOA ${domain} | awk '{print $7;}')
+
+		if [ -n "${oldsoa}" -a -n "${newsoa}" ]; then
+			if [ ${newsoa} -le ${oldsoa} ]; then
+				verbose "No SOA change for ${domain} since ${oldsoa}." 3
+				return
+			fi
+		fi
+	fi
+
+	dig ${keyfile:+-k} ${keyfile} +noall +answer @${ns} ${subdomain:+${subdomain}.}${domain} AXFR 2>/dev/null | \
+		xz -q -9 > ${ZONESDIR}/${out}.not
+	if [ $? -eq 0 ]; then
+		# Ensure first and last SOA are identical; else transfer failed.
+		# 'grep SOA' only in one to force difference if the entire output
+		#  is ';transfer failed'
+		zcat ${ZONESDIR}/${out}.not | grep SOA | head -1 > ${TDIR}/1
+		zcat ${ZONESDIR}/${out}.not | tail -1 > ${TDIR}/2
+		if [ -s ${TDIR}/1 ] && diff ${TDIR}/[12] >/dev/null 2>&1; then
+			if [ -n "${subdomain}" ]; then
+				cat ${ZONESDIR}/${out}.not >> ${ZONESDIR}/${out}
+			else
+				mv ${ZONESDIR}/${out}.not ${ZONESDIR}/${out}
+			fi
+		fi
+		rm -f ${TDIR}/[12]
+	fi
+	rm -f ${ZONESDIR}/${out}.not
+}
+
+checkTLDs() {
+	verbose "Checking TLDs..."
+
+	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${TDIR}/tlds
+	cd ${COUNTDIR}
+	for tld in *; do
+		if [ "${tld}" = "root" ]; then
+			continue
+		fi
+		echo "${tld}." >> ${TDIR}/found
+		if ! egrep -q "^${tld}.$" ${TDIR}/tlds; then
+			if [ -f "${NAMESDIR}/${tld}.xz" ]; then
+				verbose "${tld} not in root zone" 2
+				rm -f ${NAMESDIR}/${tld}.xz	\
+					${ZONESDIR}/${tld}.xz	\
+					${ZONESDIR}/${tld}.txt.gz
+				# one date without data
+				echo "${DATE}" >> ${COUNTDIR}/${tld}
+			fi
+		fi
+	done
+
+	comm -2 -3 ${TDIR}/tlds ${TDIR}/found > .missing
+
+	rm ${TDIR}/tlds ${TDIR}/found
+}
+
+checkCountFiles() {
+	verbose "Checking count files for changes..."
+	local last
+	local prev
+	local diff
+
+	cd ${COUNTDIR}
+	for f in *; do
+		diff=0
+		prev=$(tail -2 ${f} | head -1 | awk '{print $NF}')
+		last=$(tail -1 ${f} | awk '{print $NF}')
+		if [ -z ${last} -o -z ${prev} ]; then
+			echo "Skipping empty file '${f}'?" >&2
+			continue
+		fi
+		if [ ${last} -gt ${prev} ]; then
+			if [ ${last} -eq 0 ]; then
+				diff=100
+			else
+				diff=$(echo "scale=4; 100 - ${prev}/${last} * 100" | bc -l )
+			fi
+		elif [ ${prev} -gt ${last} ]; then
+			if [ ${prev} -eq 0 ]; then
+				diff=100
+			else
+				diff=$(echo "scale=4; 100 - ${last}/${prev} * 100" | bc -l )
+			fi
+		fi
+		if [ $(( $(echo "${diff} > 10" | bc) )) -gt 0 ]; then
+			diff="${diff%%0*}"
+			echo "${f}: >10% change (${diff}%: prev: ${prev}, now: ${last})"
+		fi
+	done
+}
+
+checkTypeArg() {
+	local arg
+	local allowed
+	local found=0
+
+	for arg in ${TYPE}; do
+		for allowed in ${ALLOWED_TYPES}; do
+			if [ "${arg}" = "${allowed}" ]; then
+				found=1
+				break
+			fi
+		done
+		if [ ${found} -ne 1 ]; then
+			echo "Invalid type '${arg}'." >&2
+			echo "Allowed types: ${ALLOWED_TYPES}." >&2
+			exit 1
+		fi
+		found=0
+	done
+}
+
+countNamesFiles() {
+	local domain
+	verbose "Counting names from files..."
+
+	cd ${NAMESDIR}
+	for f in *.xz; do
+		domain="${f%%.xz}"
+		verbose "${domain}..." 2
+
+		if excludeForced "${domain}"; then
+			verbose "Excluding ${domain}..." 2
+			continue
+		fi
+
+		if [ ${FORCE} -eq 0 ]; then
+			m1=$(stat -f "%m" ${f})
+			m2=$(stat -f "%m" ${COUNTDIR}/${domain} 2>/dev/null || echo 0)
+			if [ ${m1} -le ${m2} ]; then
+				verbose "Count file newer than names file, skipping..." 3
+				continue
+			fi
+		fi
+		n=$(xzcat ${f} | wc -l)
+		echo ${DATE} ${n} >> ${COUNTDIR}/${domain}
+		tr -s ' ' <${COUNTDIR}/${domain} | sort -u > ${TDIR}/f && \
+			mv ${TDIR}/f ${COUNTDIR}/${domain}
+	done
+}
+
+countTotal() {
+	verbose "Counting total number of domains..."
+
+	cd ${COUNTDIR}
+	ls | grep -v all-tlds | xargs tail -1 -q | awk -v D=${DATE} '{ if (NF > 1 ) { sum += $2;}} END { print D " " sum }' >> all-tlds 
+
+	verbose "Generating json data..."
+	sh ${BASEDIR}/tools/count2json ${COUNTDIR} | xz -9 > ${HTMLDIR}/all-tlds.json.xz 2>/dev/null
+}
+
+cleanup() {
+	rm -fr "${TDIR}"
+}
+
+excludeForced() {
+	local domain="${1}"
+
+	if [ ${FORCE} -lt 2 ]; then
+		oIFS="${IFS}"
+		IFS=" "
+		for d in ${FORCED_ZONES}; do
+			if [ x"${d}" = x"${domain}" ]; then
+				return 0
+			fi
+		done
+		IFS="${oIFS}"
+	fi
+
+	return 1
+}
+
+fetchAmCount() {
+	local count
+
+	verbose "am (name count only)..." 2
+
+	count=$(curl -s https://amnic.net/statistics/ | \
+			sed -n -e 's/.*Total[^0-9]*>\([0-9]*\)<.*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/am
+	fi
+}
+
+fetchArCount() {
+	local count
+
+	verbose "ar (name count only)..." 2
+
+	count=$(curl -s https://nic.ar/es/dominios/estadisticas |	\
+			grep -m 1 -A 16 "<tbody" | tail -1 |		\
+			sed -e 's/.*>\(.*\)<.*/\1/' | tr -d '.')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ar
+	fi
+}
+
+fetchAtCount() {
+	local count
+
+	verbose "at (name count only)..." 2
+
+	count=$(curl -s https://www.nic.at/en/good_to_know/statistics-and-studies/statistics | \
+			sed -n -e '/domain_counts_total/{s/.*domain_counts_total">\([0-9,]*\)<.*/\1/p;q;}' | \
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/at
+	fi
+}
+
+fetchAuCount() {
+	local count
+
+	verbose "au (name count only)..." 2
+
+	count=$(curl -s https://www.auda.org.au |			\
+			grep -m 1 -B 1 ".au domains registered" |	\
+			head -1 | tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/au
+	fi
+}
+
+fetchAzCount() {
+	local count
+
+	verbose "az (name count only)..." 2
+
+	count=$(curl -s "https://whois.az/?page_id=783" | \
+			sed -n -e 's|.*<td>Total:</td><td>\([0-9]*\)</td>.*|\1|p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/az
+	fi
+}
+fetchBaCount() {
+	local count
+
+	verbose "ba (name count only)..." 2
+
+	count=$(curl -s https://nic.ba/Statistics/Statistics |		\
+			grep -m 1 -A 3 ">Total<" | tail -1 |		\
+			sed -e 's/.*>\(.*\)<.*/\1/')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ba
+	fi
+}
+
+fetchBeCount() {
+	local count
+
+	verbose "be (name count only)..." 2
+
+	count=$(curl -s https://www.dnsbelgium.be/api/statistics |	\
+			jq -r '.be.total')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/be
+	fi
+}
+
+fetchBnCount() {
+	local count
+
+	verbose "bn (name count only)..." 2
+
+	count=$(curl -s https://www.bnnic.bn/ |					\
+			grep -m 1 -A 5 "<h3>Registered .BN Domains</h3>" |	\
+			tail -1 | sed -e 's/.*>\([0-9]*\) Domains.*/\1/')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/bn
+	fi
+}
+
+fetchBrCount() {
+	local count
+
+	verbose "br (name count only)..." 2
+
+	count=$(curl -s https://registro.br/nicstats.json | \
+			jq -r '.dominios.total' | tr -d '.')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/br
+	fi
+}
+
+fetchCctlds() {
+	local cctld
+
+	verbose "Fetching ccTLD zones and select data..."
+
+	axfr "ch." "zonedata.switch.ch" "${BASEDIR}/misc/ch_zonedata.key"
+
+	(
+
+	oIFS="${IFS}"
+	IFS="
+"
+
+	sub=""
+	for cctld in ${AXFR}; do
+		domain=${cctld%% *}
+		ns=${cctld##* }
+		axfr ${domain} ${ns}
+		if [ x"${domain}" != x"." ]; then
+			set +u
+			sub=$(eval echo $(echo \${SUBDOMAINS_$(echo ${domain%%.} | tr '[a-z]' '[A-Z]')}))
+			oIFS="${IFS}"
+			IFS=" "
+			for s in ${sub}; do
+				axfr ${domain} ${ns} "" ${s}
+			done
+			IFS="${oIFS}"
+			set -u
+		fi
+	done
+	IFS="${oIFS}"
+
+	axfr "li." "zonedata.switch.ch" "${BASEDIR}/misc/li_zonedata.key"
+	) &
+
+	fetchFr &
+	fetchSk &
+	fetchUs &
+}
+
+fetchCiCount() {
+	local count
+
+	verbose "ci (name count only)..." 2
+
+	count="$(curl -s https://www.nic.ci/ |				\
+		sed -n -e 's/.*>\([0-9 ]*\) noms de Domaine<.*/\1/p' |	\
+		tr -d ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ci
+	fi
+}
+
+# unused, we pull numbers manually
+fetchCnCount() {
+	local count
+
+	verbose "cn (name count only)..." 2
+
+	count="$(curl -s https://www.cnnic.com.cn/IDR/ |			\
+			sed -n -e 's/^Domain Names:\(.*\)million/\10000/p' |	\
+			tr -d '.')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/cn
+	fi
+}
+
+
+fetchClCount() {
+	local count
+
+	verbose "cl (name count only)..." 2
+
+	count="$(curl -s https://www.nic.cl/ | \
+		sed -n -e 's/.*<div id="numdominios"><span class="numerogrande">\([0-9.]*\)<.*/\1/p' | \
+		tr -d '.')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/cl
+	fi
+}
+
+fetchComAndNetCount() {
+	local count
+
+	verbose "com and net (name count only)..." 2
+
+	count="$(curl -s https://www.verisign.com/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml | \
+		egrep "<td data-domainNameBase(Com|Net)Count" | \
+		sed -e 's/.*"\([0-9,]*\)".*/\1/' | \
+		tr -d ',' | tr '\n' ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count%% *} >> ${COUNTDIR}/com
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/net
+	fi
+}
+
+fetchCwCount() {
+	local count
+
+	verbose "cw (name count only)..." 2
+
+	count="$(curl -s https://www.uoc.cw/domain-registration/cw-registered-domains | \
+			sed -n -e 's|<span style="margin-left: 20px;">||gp' | \
+			tr '' '\n' | grep -c "</span><br")"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/cw
+	fi
+}
+
+fetchCzCount() {
+	local count
+
+	verbose "cz (name count only)..." 2
+
+	count="$(curl -s -H 'accept: application/json' https://stats.nic.cz/fred_domains_latest | \
+		jq '.[] | select(.zone=="cz") | .domains')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/cz
+	fi
+}
+
+fetchDeCount() {
+	local count
+
+	verbose "de (name count only)..." 2
+
+	count="$(curl -s https://www.denic.de/ | \
+			sed -n -e 's/.*<p class="count-total"><span class="number">\([0-9.]*\)<\/span> .de-Domains.*/\1/p' | \
+			tr -d '.')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/de
+	fi
+}
+
+fetchDkCount() {
+	local count
+
+	verbose "dk (name count only)..." 2
+
+	count="$(curl -s -d '{"version":"1.0.0","queries":[{"Query":{"Commands":[{"SemanticQueryDataShapeCommand":{"Query":{"Version":2,"From":[{"Name":"s","Entity":"stats vIDN_domains (last 60 days)","Type":0},{"Name":"k","Entity":"Kalender","Type":0}],"Select":[{"Aggregation":{"Expression":{"Column":{"Expression":{"SourceRef":{"Source":"s"}},"Property":"Antal registrerede domænenavne"}},"Function":0},"Name":"Sum(stats vIDN_domains (last 60 days).AntalDomaener)"},{"Column":{"Expression":{"SourceRef":{"Source":"k"}},"Property":"Dato"},"Name":"Kalender.Dato"}]},"Binding":{"Primary":{"Groupings":[{"Projections":[0,1]}]},"DataReduction":{"DataVolume":4,"Primary":{"BinnedLineSample":{}}},"Version":1},"ExecutionMetricsKind":1}}]},"CacheKey":"{\"Commands\":[{\"SemanticQueryDataShapeCommand\":{\"Query\":{\"Version\":2,\"From\":[{\"Name\":\"s\",\"Entity\":\"stats vIDN_domains (last 60 days)\",\"Type\":0},{\"Name\":\"k\",\"Entity\":\"Kalender\",\"Type\":0}],\"Select\":[{\"Aggregation\":{\"Expression\":{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"s\"}},\"Property\":\"Antal registrerede domænenavne\"}},\"Function\":0},\"Name\":\"Sum(stats vIDN_domains (last 60 days).AntalDomaener)\"},{\"Column\":{\"Expression\":{\"SourceRef\":{\"Source\":\"k\"}},\"Property\":\"Dato\"},\"Name\":\"Kalender.Dato\"}]},\"Binding\":{\"Primary\":{\"Groupings\":[{\"Projections\":[0,1]}]},\"DataReduction\":{\"DataVolume\":4,\"Primary\":{\"BinnedLineSample\":{}}},\"Version\":1},\"ExecutionMetricsKind\":1}}]}","QueryId":"","ApplicationContext":{"DatasetId":"85b0f1f1-467a-482e-9930-1cb5998a9791","Sources":[{"ReportId":"f83c4a9e-abaa-4bac-b4c7-42ebfd8d2bc8","VisualId":"a0ce2f35a20e346210b9"}]}}],"cancelQueries":[],"modelId":1914221}' \
+		"https://wabi-west-europe-b-primary-api.analysis.windows.net/public/reports/querydata?synchronous=true" --compressed | \
+		jq -r '.results[0].result.data.dsr.DS[0].PH[0].DM0 | last | .C | last')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/dk
+	fi
+}
+
+fetchDoCount() {
+	local count
+
+	verbose "do (name count only)..." 2
+
+	# missing intermediate cert
+	count="$(curl -k -s https://nic.do/estadisticas/files/dominios.csv | \
+			awk -F, '/^Total/ { print $2}')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/do
+	fi
+}
+
+fetchDzCount() {
+	local count
+
+	verbose "dz and xn--lgbbat1ad8j (name count only)..." 2
+
+	count="$(curl -s http://www.nic.dz/en/ | \
+			sed -n -e "s|.*<tbody><tr><td><strong>Total</strong></td><td style='text-align:right;'><strong>\([0-9]*\)<.*|\1|p")"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/dz
+	fi
+
+	count="$(curl -s http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/ | \
+			sed -n -e '/<table.*strong>[0-9]*</ { s/.*strong>\([0-9]*\)<.*/\1/p; q;}')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--lgbbat1ad8j
+	fi
+}
+
+fetchEcCount() {
+	local count
+
+	verbose "ec (name count only)..." 2
+
+	count="$(curl -s https://www.nic.ec/ | \
+			sed -n -e '/animateValue(obj, 0/ { s/.*, \([0-9]*\),.*/\1/p; q; }')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ec
+	fi
+}
+fetchEuCount() {
+	local count
+
+	verbose "eu, xn--qxa6a, and xn--e1a4c  (name count only)..." 2
+
+	curl -s -o ${TDIR}/eu https://eurid.eu/en/welcome-to-eurid/statistics/
+	count="$(awk -F, '/var countUpEuStatGeneralEU/ { print $2; exit; }' ${TDIR}/eu | \
+			tr -d ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/eu
+	fi
+
+	count="$(awk -F, '/var countUpEuStatGeneralGreek/ { print $2; exit; }' ${TDIR}/eu | \
+			tr -d ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--qxa6a
+	fi
+
+	count="$(awk -F, '/var countUpEuStatGeneralCyrillic/ { print $2; exit; }' ${TDIR}/eu | \
+			tr -d ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--e1a4c
+	fi
+
+	rm ${TDIR}/eu
+}
+
+fetchEsCount() {
+	local count
+
+	verbose "es (name count only)..." 2
+
+	count="$(curl -s https://www.dominios.es/es |		\
+			grep -m 1 -A 2 ">Ya somos<" |		\
+			sed -n -e 's/.*>\([0-9.]*\)<.*/\1/p' |	\
+			tr -d '.')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/es
+	fi
+}
+
+fetchFiCount() {
+	local url="https://odata.domain.fi/OpenDomainData.svc/"
+	local link='Domains?$inlinecount=allpages'
+	local count
+
+	verbose "fi (name count only)..." 2
+
+	count=$(curl -s -H 'Accept: application/json' "${url}/${link}" | \
+			jq -r '."odata.count"')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/fi
+	fi
+}
+
+fetchFoCount() {
+	local count
+
+	verbose "fo (name count only)..." 2
+
+	count=$(curl -s https://xn--kisnavn-p1a.fo/ |		\
+			grep -m 1 -A 1 ">www .fo<"  |		\
+			tail -1 |				\
+			sed -e 's/.*>\([0-9,]*\)<.*/\1/' |	\
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/fo
+	fi
+}
+
+fetchFr() {
+	local y=$(date +%Y)
+	local m=$(date +%m | sed -e 's/^0//')
+
+	verbose "fr (names only)..." 2
+
+	if [ -f "${NAMESDIR}/fr.xz" ] && [ ${FORCE} -eq 0 ]; then
+		verbose "Already fetched." 3
+		return
+	fi
+
+	if [ x"${m}" = x"1" ]; then
+		y=$(( $y - 1 ))
+		m=12
+	else
+		m=$(printf "%02d" $(( $m - 1 )))
+	fi
+
+	verbose "Fetching fr.zip for ${y}${m} into ${TDIR}/fr.zip..." 2
+	curl -f -s -o ${TDIR}/fr.zip https://www.afnic.fr/wp-media/ftp/documentsOpenData/${y}${m}_OPENDATA_A-NomsDeDomaineEnPointFr.zip || return 0
+
+	verbose "Extracting names..." 2
+	cd ${TDIR}
+	unzip fr.zip >/dev/null
+	rm fr.zip
+	awk -F';' '/^[^"]/ { print $1}' *.csv |
+		xz -q -9 > ${NAMESDIR}/fr.xz
+	rm *.csv
+}
+
+fetchGeCount() {
+	local count
+
+	verbose "ge (name count only)..." 2
+
+	count=$(curl -s https://nic.ge/en/administrator/statistics |	\
+			grep -A 1 '<div class="value">' |		\
+			tail -1 | sed -e 's/.*<p>\([0-9,]*\)<.*/\1/' |	\
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ge
+	fi
+}
+
+fetchGtCount() {
+	local count
+
+	verbose "gt (name count only)..." 2
+
+	count=$(curl -s https://www.gt/estadisticas/data.json | \
+			jq '[.estadisticas[].count] | add')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/gt
+	fi
+}
+
+
+fetchGtlds() {
+	verbose "Fetching gTLDs..."
+	local vflag=""
+	local rdir=">/dev/null"
+
+	# com and net are large; Verisign has stats on
+	# their site, so let's avoid fetching these
+	local exclude="-exclude com,net"
+
+	if [ ${VERBOSITY} -gt 2 ]; then
+		vflag="-verbose"
+		rdir=""
+	fi
+
+	if [ ${FORCE} -gt 1 ]; then
+		exclude=""
+	fi
+
+	eval czds-dl ${vflag} -redownload -out ${ZONESDIR}	\
+		${exclude}					\
+		-username jschauma@netmeister.org		\
+		-password "\$(cat ${PASSWDFILE})" ${rdir}
+
+	verbose "Fetching gTLDs complete." 2
+}
+
+fetchHkCount() {
+	local count
+
+	verbose "hk and xn--j6w193g (name count only)..." 2
+
+	count=$(curl -s -X POST -d "method=statistics1&lang=2" "https://www.hkirc.hk/api.php" | \
+		jq -r '.data | last | "\(.["HK"]) \(.["香港"])"' )
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count% *} >> ${COUNTDIR}/hk
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--j6w193g
+	fi
+}
+
+fetchHrCount() {
+	local count
+
+	verbose "hr (name count only)..." 2
+
+	count=$(curl -s https://www.domene.hr/en/portal/home |	\
+			sed -n -e 's/.*NUMBER OF REGISTERED .HR DOMAINS.*>\([0-9]*\)<.*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/hr
+	fi
+}
+
+fetchHtCount() {
+	local count
+
+	verbose "ht (name count only)..." 2
+
+	count=$(curl -s -H 'User-Agent: Mozilla/5.0' https://nic.ht/en/ |	\
+			tr '<' '\n' |						\
+			sed -n -e 's/.*data-digit="\([0-9]*\)".*/\1+/p' |	\
+			tr -d '\n' | sed -e 's/\+$//' | bc)
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ht
+	fi
+}
+
+fetchHuCount() {
+	local count
+
+	verbose "hu (name count only)..." 2
+
+	count=$(curl -s https://info.domain.hu/stats/generated/info-domain-stat-getdata_a.json | \
+			jq -r '.[0].data | last[1]')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/hu
+	fi
+}
+
+fetchIdCount() {
+	local count
+
+	verbose "id (name count only)..." 2
+
+	count=$(curl -s https://pandi.id/api/v1/domain-statistics/legacy/stats | \
+			jq -r '.data.registered_total')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/id
+	fi
+}
+
+fetchIeCount() {
+	local count
+
+	verbose "ie (name count only)..." 2
+
+	count=$(curl -s https://www.weare.ie/ie-domain-profile-report/ | \
+			sed -n -e 's/.*<div class="counter">\([0-9,]*\)<.*/\1/p' | \
+			head -1 | tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ie
+	fi
+}
+
+fetchIlCount() {
+	local count
+
+	verbose "il and xn--4dbrk0ce (name count only)..." 2
+
+	curl -o ${TDIR}/il -s https://en.isoc.org.il/il-cctld/number-of-registered-domain-names-2023
+	count=$(grep -m 1 -A1 "domainitem" ${TDIR}/il |				\
+		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
+		tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/il
+	fi
+
+	count=$(grep -A1 "domainitem" ${TDIR}/il |				\
+		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
+		tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--4dbrk0ce
+	fi
+
+	rm ${TDIR}/il
+}
+
+fetchIrCount() {
+	local count idn ir total
+
+	verbose "ir and xn--mgba3a4f16a (name count only)..." 2
+
+	count="$(curl -s -H 'User-Agent: Mozilla/5.0' https://www.nic.ir/Statistics | \
+			egrep -A1 "(>ایران<)|primary-cell" | \
+			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p' | tr '\n' ' ')"
+
+	if [ -n "${count}" ]; then
+		idn=${count%% *}
+		ir=${count#* }
+		total=$(( ${ir} - ${idn} ))
+		echo ${DATE} ${total} >> ${COUNTDIR}/ir
+		echo ${DATE} ${idn} >> ${COUNTDIR}/xn--mgba3a4f16a
+	fi
+}
+
+fetchIsCount() {
+	local count
+
+	verbose "is (name count only)..." 2
+
+	count=$(curl -s https://www.isnic.is/en/tolur | \
+			grep -A8 ">domestic<" |		\
+			tail -4 | 			\
+			awk -F'[><]' '{ if ((NR == 1) || (NR == 4)) { sum += $3 }} END { print sum }')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/is
+	fi
+}
+
+fetchItCount() {
+	local count
+
+	verbose "it (name count only)..." 2
+
+	count=$(curl -s https://stats.nic.it/api/v2/domain/counter | \
+			jq -r '.counter')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/it
+	fi
+}
+
+fetchJoCount() {
+	local count
+
+	verbose "jo and xn--mgbayh7gpa (name count only)..." 2
+
+	count=$(curl -s https://www.dns.jo/stat.aspx |			\
+		tr '<' '\n' | 						\
+		sed -n -e "s/^TD align='center'>\([0-9]*\)$/\1/p" |	\
+		awk '{last=$1; sum += $1 } END { print (sum - last) " " last }')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count% *} >> ${COUNTDIR}/jo
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--mgbayh7gpa
+	fi
+}
+
+fetchJpCount() {
+	local count
+
+	verbose "jp (name count only)..." 2
+
+	count=$(curl -s https://jprs.co.jp/en/stat/ | \
+			sed -n -e 's/.*<p>The number of JP domain name registrations.* \([0-9]*\)).*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/jp
+	fi
+}
+
+fetchKeCount() {
+	local count
+
+	verbose "ke (name count only)..." 2
+
+	count=$(curl -s https://kenic.or.ke/ |			\
+		sed -n -e '/counter-value/{s/.*<span class="counter-value" data-count="\([0-9]*\)".*/\1/p; q;}')
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ke
+	fi
+}
+
+fetchKrCount() {
+	local count
+
+	verbose "kr and xn--3e0b707e (name count only)..." 2
+
+	count=$(curl -s https://krnic.or.kr/jsp/statboard/domain/reg/currentNation.jsp | \
+		sed -n -e 's/.*<td class="txtC bdLast txtSmall ">\([0-9,-]*\)<.*/\1/p' | \
+		tr -d ',' | awk '{ nums[NR] = $1;} END { print nums[1] " " nums[3]; }')
+
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count% *} >> ${COUNTDIR}/kr
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--3e0b707e
+	fi
+}
+
+fetchLtCount() {
+	local count
+
+	verbose "lt (name count only)..." 2
+
+	count=$(curl -s https://www.domreg.lt/export/currcounts.json | \
+			jq -r '.registered')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/lt
+	fi
+}
+
+fetchLuCount() {
+	local count
+
+	verbose "lu (name count only)..." 2
+
+	count=$(curl -s https://dns.lu/fr |					\
+			grep -m 1 -A1 '<div class="statistic-block__number">' |	\
+			tail -1 | tr -d ',' | tr -d ' ')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/lu
+	fi
+}
+
+fetchMaCount() {
+	local count
+
+	verbose "ma (name count only)..." 2
+
+	count=$(curl -s https://www.registre.ma/language/en/resources/e-statistiques | \
+			sed -n -e '/Class="odometer/ { s/.*>\([0-9]*\)<.*/\1/p; q; }')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ma
+	fi
+}
+fetchMkCount() {
+	local count
+
+	verbose "mk (name count only)..." 2
+
+	count=$(curl -s https://marnet.mk/en/ |
+			sed -n -e 's/.*data-counter-value="\([0-9]*\)".*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/mk
+	fi
+}
+
+fetchNlCount() {
+	local count
+
+	verbose "nl (name count only)..." 2
+
+	count=$(curl -s https://stats.sidnlabs.nl/assets/data/registration-hist.json | \
+			jq -r '.tot | last | .[1]')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/nl
+	fi
+}
+
+
+fetchNoCount() {
+	local count
+
+	verbose "no (name count only)..." 2
+
+	count=$(curl -s "https://www.norid.no/en/om-domenenavn/nokkeltall/" |	\
+		grep -m 1 -A 1 '<div class="nrd-kpi__data">' |			\
+		sed -n -e 's/ *\(.*\)<\/div>/\1/p' |				\
+		tr -d ' ')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/no
+	fi
+}
+
+fetchNuOrSeCount() {
+	local count
+	local which="${1}"
+
+	verbose "${which} (name count only)..." 2
+
+	count=$(curl -s https://internetstiftelsen.se/en/domains/domain-statistics/growth-${which}/ | \
+			sed -n -e 's/.*Internetstiftelsen.data.* = \({.*}\);.*/\1/p' | \
+			jq -r 'select(.interval == false) | .json | last | .value')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/${which}
+	fi
+}
+
+fetchPlCount() {
+	local count
+
+	verbose "pl (name count only)..." 2
+
+	count=$(curl -s https://www.dns.pl/api/zone-stats | \
+			jq -r '.stats.rows[0] | .[2]')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/pl
+	fi
+}
+
+fetchPtCount() {
+	local count
+
+	verbose "pt (name count only)..." 2
+
+	count=$(curl -s https://www.pt.pt/pt/estatisticas/ | \
+			tr '}' '\n'  | \
+			sed -n -e 's/.*"registered": "\([0-9]*\)","details": .<span class="title">Total dom.*/\1/p' | \
+			tail -1)
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/pt
+	fi
+}
+
+fetchRsCount() {
+	local count
+
+	verbose "rs and xn--90a3ac (name count only)..." 2
+
+	count=$(curl -s https://www.rnids.rs/en/ | \
+			sed -n -e 's/.*frontpage_number_of_domains_srb_domains_num.*>\([0-9]*\)<.*/\1/p' | \
+			tr '\n' ' ')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count%% *} >> ${COUNTDIR}/rs
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--90a3ac
+	fi
+}
+
+fetchRuCount() {
+	local count
+
+	verbose "ru and xn--p1ai (name count only)..." 2
+
+	count=$(curl -s https://statdom.ru/rest/_stats/ru/$(date +%Y-%m-%d) | \
+			jq -r '.total')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ru
+	fi
+
+	count=$(curl -s https://statdom.ru/rest/_stats/%D1%80%D1%84/$(date +%Y-%m-%d) | \
+			jq -r '.total')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--p1ai
+	fi
+}
+
+
+fetchSaCount() {
+	local count
+
+	verbose "sa and xn--mgberp4a5d4ar (name count only)..." 2
+
+	curl -o ${TDIR}/sa -s https://nic.sa/api/statistics/
+	count=$(jq -r '.domains_per_year_acc | last | .domains' ${TDIR}/sa)
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/sa
+	fi
+
+	count=$(jq -r '.domains_per_zone | .[] | select(.zone == ".السعودية") | .domains' <${TDIR}/sa)
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--mgberp4a5d4ar
+	fi
+
+	rm ${TDIR}/sa
+}
+
+fetchSgCount() {
+	local count
+
+	verbose "sg (name count only)..." 2
+
+	count=$(curl -s https://www.sgnic.sg/about-us/registration-statistics | \
+			grep -B2 "</tbody>" |					\
+			sed -n -e 's/.*">\([0-9,]*\)<.*/\1/p' |			\
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/sg
+	fi
+}
+
+fetchSiCount() {
+	local count
+
+	verbose "si (name count only)..." 2
+
+	count=$(curl -s https://www.register.si/ | \
+			grep -m 1 -A 1 '<div class="statistics-insid' | \
+			sed -n -e 's/.*number">\([0-9.]*\)<.*/\1/p' |	\
+			tr -d '.')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/si
+	fi
+}
+
+fetchThCount() {
+	local count
+
+	verbose "th and xn--o3cw4h (name count only)..." 2
+
+	count="$(curl -s https://www.thnic.co.th/stats |			\
+			grep -m 2 -B1 "</tr><tr>"     | 		\
+			sed -n -e 's/.*td>\([0-9,]*\)<.*/\1/p' |	\
+			tr -d ',' | tr '\n' ' ')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count%% *} >> ${COUNTDIR}/th
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--o3cw4h
+	fi
+}
+
+fetchTnCount() {
+	local count
+
+	verbose "tn and xn--pgbs0dh (name count only)..." 2
+
+	count="$(curl -s https://www.registre.tn/stats/stats/tmpFILES-stats04/stats04-data.tn | \
+			sed -n -e 's/.*,\([0-9]*\)\]\]$/\1/p')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/tn
+	fi
+
+	count="$(curl -s https://www.registre.tn/stats/stats/tmpFILES-stats04/stats04-data.tounes | \
+			sed -n -e 's/.*,\([0-9]*\)\]\]$/\1/p')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--pgbs0dh
+	fi
+}
+
+fetchTrCount() {
+	local count
+
+	verbose "tr (name count only)..." 2
+
+	count=$(curl -s --http1.1 https://www.trabis.gov.tr/ozet |	\
+			grep -m 1 -A 1 '<div class="circle">' |		\
+			sed -n -e 's/.*<p>\([0-9.]*\)<.*/\1/p' |	\
+			tr -d '.')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/tr
+	fi
+}
+
+fetchTwCount() {
+	local count
+
+	verbose "tw and xn--kpry57d (name count only)..." 2
+
+	curl -f -s -o ${TDIR}/tw https://www.twnic.tw/dnjson.txt || return
+	count=$(jq -r '[to_entries | .[] | select((.key != "") and (.key | endswith(".台灣") | not)) | .value | last | last] | add' <${TDIR}/tw)
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/tw
+	fi
+
+	count=$(jq -r '[to_entries | .[] | select( .key | endswith(".台灣")) | .value | last | last] | add' <${TDIR}/tw)
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--kpry57d
+	fi
+
+	rm -f ${TDIR}/tw
+}
+
+fetchTzCount() {
+	local count
+
+	verbose "tz (name count only)..." 2
+
+	count=$(curl -s https://karibu.tz/ | \
+			grep -m 1 -B 1 '<p><a href="/domains/list/">Registered .TZ domain names</a></p>' | \
+			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/tz
+	fi
+}
+
+fetchUaCount() {
+	local count
+
+	verbose "ua (name count only)..." 2
+
+	count=$(curl -s "https://www.hostmaster.ua/UAstat/?today" | 	\
+			grep -m 1 -A 1 '<td class="tdrr">' |		\
+			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ua
+	fi
+}
+
+fetchUkCount() {
+	local count
+
+	verbose "uk (name count only)..." 2
+
+	count=$(curl -s "https://www.nominet.uk/news/reports-statistics/uk-register-statistics-$(date +%Y)/" | \
+			grep total-domains-under-management-at-end-of-month |	\
+			perl -pe 's|.*?class="Third-level">([0-9,]+)</td><td .*?class="Second-level">([0-9,]+)</td></tr></tbody>.*|$1 $2|' | \
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		count=$(echo $count | tr ' ' '+' | bc)
+		echo ${DATE} ${count} >> ${COUNTDIR}/uk
+	fi
+}
+
+fetchUs() {
+	local url
+
+	verbose "us..." 2
+
+	if [ ! -f ~/.godaddy.apikey ]; then
+		verbose "Missing API key ~/.godaddy.apikey." 3
+		return
+	fi
+
+	url=$(curl -s -H "X-FilesAPI-Key: $(cat ~/.godaddy.apikey)" \
+		"https://zones.dnrs.godaddy/api/rest/v1/files/US%2Fus.zone.${DATE}.bz2"  | \
+		jq -r '.download_uri')
+	if [ -n "${url}" ]; then
+		curl -f -s -o ${ZONESDIR}/us.not "${url}" &&
+			mv ${ZONESDIR}/us.not ${ZONESDIR}/us.bz2
+		rm -f ${ZONESDIR}/us.not
+	fi
+}
+
+fetchUyCount() {
+	local count
+
+	verbose "uy (name count only)..." 2
+
+	# incorrect chain
+	count=$(curl -k -s https://www.nic.uy/Registrar/estadist/index.htm | \
+			grep -A1 "Total UY" | \
+			sed -n -e 's/.*">\([0-9]*\)<.*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/uy
+	fi
+}
+
+fetchUzCount() {
+	local count
+
+	verbose "uz (name count only)..." 2
+
+	count=$(curl -s https://www.cctld.uz/stat/ | \
+			sed -n -e '/<td>[0-9 ]/ { s/.*td>\([0-9 ]*\)<.*/\1/p; q; }' | \
+			tr -d ' ')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/uz
+	fi
+}
+
+fetchVnCount() {
+	local count
+
+	verbose "vn (name count only)..." 2
+
+	count=$(curl -s https://tenmien.vn/ | \
+			sed -n -e '/title-thong-ke/ { s/.*>\([0-9,]*\)<.*/\1/p; q; }' | \
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/vn
+	fi
+}
+
+fetchZaCount() {
+	local count
+
+	verbose "za (name count only)..." 2
+
+	count=$(curl -s "https://www.zadna.org.za/" |
+			sed -n -e 's/.*data-digit="\([0-9]*\)".*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/za
+	fi
+}
+
+matchType() {
+	local wanted="${1}"
+
+	if expr "${TYPE}" : ".*${wanted}.*" >/dev/null; then
+		return 0
+	fi
+	if expr "${TYPE}" : ".*all.*" >/dev/null; then
+		return 0
+	fi
+	return 1
+}
+
+fetchSk() {
+	verbose "sk (names only)..." 2
+
+	if [ -f "${NAMESDIR}/sk.xz" ] && [ ${FORCE} -eq 0 ]; then
+		verbose "Already fetched." 3
+		return
+	fi
+
+	curl -s https://sk-nic.sk/subory/domains.txt |	\
+		awk -F';' '/sk;/ { print $1}' |		\
+		xz -q -9 > ${NAMESDIR}/sk.xz
+}
+
+fetchStats() {
+	verbose "Fetching stats from websites..."
+
+	# some of these may fail, but let's try them all
+	set +e
+
+	if [ ${FORCE} -lt 2 ]; then
+		fetchComAndNetCount
+		fetchNuOrSeCount "nu"
+		fetchNuOrSeCount "se"
+	fi
+
+	fetchAmCount
+	fetchArCount
+	fetchAtCount
+	fetchAuCount
+	fetchAzCount
+	fetchBaCount
+	fetchBeCount
+	fetchBnCount
+	fetchBrCount
+	fetchCiCount
+	fetchClCount
+	fetchCwCount
+	fetchCzCount
+	fetchDeCount
+	fetchDkCount
+	fetchDoCount
+	fetchDzCount
+	fetchEcCount
+	fetchEuCount
+	fetchEsCount
+	fetchFiCount
+	fetchFoCount
+	fetchGeCount
+	fetchGtCount
+	fetchHkCount
+	fetchHrCount
+	fetchHtCount
+	fetchHuCount
+	fetchIdCount
+	fetchIeCount
+	fetchIlCount
+	fetchIrCount
+	fetchIsCount
+	fetchItCount
+	fetchJoCount
+	fetchJpCount
+	fetchKeCount
+	fetchKrCount
+	fetchLtCount
+	fetchLuCount
+	fetchMaCount
+	fetchMkCount
+	fetchNlCount
+	fetchNoCount
+	fetchPlCount
+	fetchPtCount
+	fetchRsCount
+	fetchRuCount
+	fetchSaCount
+	fetchSgCount
+	fetchSiCount
+	fetchSuCount
+	fetchSvCount
+	fetchThCount
+	fetchTnCount
+	fetchTrCount
+	fetchTwCount
+	fetchTzCount
+	fetchUaCount
+	fetchUkCount
+	fetchUyCount
+	fetchUzCount
+	fetchVnCount
+	fetchZaCount
+
+	set -e
+
+}
+
+fetchSuCount() {
+	verbose "su (names only)..." 2
+
+	count=$(curl -s https://statdom.ru/rest/_stats/su/$(date +%Y-%m-%d) | \
+			jq -r '.total')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/su
+	fi
+}
+
+fetchSvCount() {
+	verbose "sv (names only)..." 2
+
+	count=$(curl -s https://svnet.sv/ |
+			sed -n -e 's/.*data-to-value="\([0-9]*\)".*/\1/p' | \
+			awk '{sum += $1} END { print sum }')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/sv
+	fi
+}
+
+
+fillTopTen() {
+	local count n sum
+	local data labels
+	local toptencount percent total
+
+	cat ${HTMLDIR}/.topten-head > ${HTMLDIR}/topten.html
+
+	oIFS="${IFS}"
+	IFS="
+"
+	sum=0
+	labels=""
+	data=""
+	count=1
+
+	cat >>${HTMLDIR}/.index-middle <<EOF
+
+  <h2 id="topten">Top Ten</h2>
+
+  <p>The top ten TLDs by domain name count are:</p>
+
+  <table style="margin: 0 auto; width: 50%; border-width:0">
+EOF
+
+	for pair in $(head ${COUNTDIR}/.all-sorted); do
+		n=${pair%% *}
+		d=${pair##* }
+
+		printf "%'d %s\n" ${n} ${d} |
+			awk -v NUM=${count} '{print "    <tr>\n      <td style=\"width: 5%\">" NUM ".</td>\n      <td style=\"width: 25%; text-align: right\">" $1 "</td>\n      <td>&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n    </tr>\n" }' >> ${HTMLDIR}/.index-middle
+
+		sum=$(( ${sum} + ${n} ))
+		labels="${labels}^      \"${d}\","
+		data="${data}^        data_${d}.data.slice(-1)[0].y,"
+		count=$(( ${count} + 1 ))
+
+		echo "  <script src=\"/tldstats/${d}/data.js\"></script>" >> ${HTMLDIR}/topten.html
+	done
+	IFS="${oIFS}"
+
+	total=$(tail -1 ${COUNTDIR}/all-tlds | awk '{print $2}')
+	toptencount=$(( ${total} - ${sum} ))
+	percent=$( printf "%.2f" $(echo "${sum}/${total} * 100" | bc -l) )
+
+	sed -e "s/::LABELS::/${labels}/" \
+		-e "s/::DATA::/${data}/" \
+		-e "s/::TOTAL::/${toptencount}/" ${HTMLDIR}/.toptenjs | \
+		tr '^' '\n' > ${HTMLDIR}/topten.js
+
+	cat ${HTMLDIR}/.topten-tail >> ${HTMLDIR}/topten.html
+
+	cat >>${HTMLDIR}/.index-middle <<EOF
+  </table>
+
+  <p>These top ten TLDs account for approximately ${percent}% of all domain names.</p>
+
+EOF
+}
+
+generateHTML() {
+	verbose "Generating HTML and graphs..."
+	local v=""
+	local num=0
+	local count=0
+	local total=0
+	local percent=0
+	local grandTotal=0
+
+	if [ ${VERBOSITY} -gt 2 ]; then
+		v="v"
+	fi
+
+	cd ${COUNTDIR}
+	num=$( ls | wc -l )
+	numMissing=$(wc -l < ${COUNTDIR}/.missing)
+	total=$(( ${numMissing} + ${num} ))
+	percent=$( printf "%.2f" $(echo "${num}/${total} * 100" | bc -l) )
+	grandTotal=$( printf "%'d" $(tail -1 all-tlds | awk '{print $2}'))
+
+	verbose "Gathering top ten and all stats..." 2
+
+	for f in *; do
+		echo "$(sed -n -e '$ s/.* //p' ${f}) ${f}"
+	done | sort -rn | grep -v "all-tlds" > .all-sorted
+
+	# all.html
+	(
+	sed -e "s/::DATE::/${DATE}/g" ${HTMLDIR}/.all-head
+
+	< ${COUNTDIR}/.all-sorted xargs -n 2 printf "%'d %s\n" |
+		awk '{print "            <tr>\n              <td style=\"width: 5%\">" NR ".</td>\n              <td style=\"width: 25%; text-align: right\">" $1 "</td>\n              <td>&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n            </tr>\n" }'
+
+	M=$(egrep -c "^[0-9]{7}" .all-sorted)
+	HK=$(egrep -c "^[0-9]{6} " .all-sorted)
+	TK=$(egrep -c "^[0-9]{5} " .all-sorted)
+	K=$(egrep -c "^[0-9]{4} " .all-sorted)
+	H=$(egrep -c "^[0-9]{3} " .all-sorted)
+	T=$(egrep -c "^[0-9]{1,2} " .all-sorted)
+
+	sed -e "s/::1M::/${M}/g"	\
+		-e "s/::100K::/${HK}/g"	\
+		-e "s/::10K::/${TK}/g"	\
+		-e "s/::1K::/${K}/g"	\
+		-e "s/::100::/${H}/g"	\
+		-e "s/::tens::/${T}/g"	\
+		${HTMLDIR}/.all-tail
+	) > ${HTMLDIR}/all.html
+
+	# index.html
+	cat >${HTMLDIR}/.index-middle <<EOF
+  <p>As of $(date +%Y-%m-%d), this page shows stats for ${num}/${total} (~${percent}%)
+     TLDs, counting a total of ${grandTotal} second-level domains.  You can download
+     a JSON file containing all stats from <a href="all-tlds.json.xz">here</a>.</p>
+
+EOF
+	fillTopTen
+
+	cat >>${HTMLDIR}/.index-middle <<EOF
+  <p><em>Note</em>: the top ten only accounts for TLDs for which data
+     is available (several large ccTLDs do not provide this information).</p>
+
+  <p>You can find all TLDs for which data is available sorted by number
+     of domains <a href="all.html">here</a>.</p>
+
+  <h2 id="graphs">Zone Stat Graphs</h2>
+
+  <p>Zone stat line graphs for ${num} TLDs are available below:</p>
+
+  <p><a href="all-tlds/">All TLDs combined</a></p>
+
+  <table style="border-width:0">
+    <tr>
+      <td style="vertical-align: top">
+        <ul>
+EOF
+	for f in *; do
+		nofill=""
+		verbose "${f}..." 2
+		sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/plot | gnuplot 2>/dev/null
+		for nf in ${NOFILL_DOMAINS}; do
+			if [ "${f}" = "${nf}" ]; then
+				nofill="nofill"
+				break
+			fi
+		done
+		perl -Tw ${BASEDIR}/tools/htmlify.pl ${f} ${nofill}
+		if [ x"${f}" = x"all-tlds" ]; then
+			continue
+		fi
+		printf "        <li><a href=\"${f}/\">${f}</a></li>\n"  >> ${HTMLDIR}/.index-middle
+		count=$(( ${count} + 1 ))
+		if [ ${count} -eq $(( ${num} / 4 + 1)) ]; then
+			printf "    </ul>\n  </td>\n  <td style=\"vertical-align: top\">\n    <ul>\n" >> ${HTMLDIR}/.index-middle
+			count=0
+		fi
+	done
+
+	missing=$(tr '\n' ' ' <${COUNTDIR}/.missing)
+	cat >>${HTMLDIR}/.index-middle <<EOF
+      </ul>
+      </td>
+    </tr>
+  </table>
+
+  <hr style="width: 75%">
+
+  <p>The following ${numMissing} TLDs are missing stats:<br>
+  ${missing}
+  </p>
+EOF
+	
+	cat ${HTMLDIR}/.index-* > ${HTMLDIR}/index.html
+
+	verbose "Syncing into docroot..." 2
+	rsync -a${v} ${HTMLDIR}/. /htdocs/netmeister.org/tldstats/.
+	chmod -R a+rX /htdocs/netmeister.org/tldstats/
+}
+
+identifyMissingZones() {
+	verbose "Identifying missing zones..."
+	
+	if [ ! -f "${NAMESDIR}/root.xz" ]; then
+		if [ ! -f "${ZONESDIR}/.xz" ]; then
+			axfr "." "f.root-servers.net."
+		fi
+		zcat ${ZONESDIR}/.xz |						\
+			awk '/^[^.]*.[	 ].*[nN][sS][ 	]/ { print $1 }' |	\
+			sort -u | xz -q -9 > "${NAMESDIR}/root.xz"
+	fi
+
+	# skip "."
+	zcat ${NAMESDIR}/root.xz | grep .. | sort -u > ${TDIR}/1
+
+	( find ${ZONESDIR} -type f; find ${COUNTDIR} -newer ${TDIR}/start ) |	\
+		sed -e "s|^.*/\([^.]*\).*|\1.|" |				\
+		grep -v '^root$' |						\
+		sort -u > ${TDIR}/2
+	echo "${HAVE_STATS}" > ${TDIR}/havestats
+
+	comm -2 -3 ${TDIR}/[12] > ${TDIR}/3
+	grep -v -f ${TDIR}/havestats ${TDIR}/3 > ${TDIR}/missing
+}
+
+identifyNSECZones() {
+	local d ns
+	verbose "Identifying NSEC zones..."
+
+	for d in $(cat ${TDIR}/missing); do
+		echo "=> $d"
+		ns=$(dig +dnssec +nostats +noquestion +nocomments +nocmd ns 0.${d} | \
+			grep NSEC | grep -v NSEC3 || true)
+		# our local resolver is faster, so try that first
+		if [ -n "${ns}" ]; then
+			echo "${d}" >> ${TDIR}/nsec
+		else
+			auth=$(dig +short ns ${d} | tail -1)
+			ns=$(dig @${auth} +dnssec +nostats +noquestion +nocomments +nocmd ns 0.${d} | \
+				grep NSEC | grep -v NSEC3 || true)
+			if [ -n "${ns}" ]; then
+				echo "${auth} ${d}" >> ${TDIR}/nsec-auth
+			fi
+		fi
+        done
+}
+
+ldnsWalk() {
+	local domain="${1%.}"
+	local ns="${2:-""}"
+
+	verbose "ldns-walk'ing ${domain}${ns:+ from ${ns}}..." 2
+	ldns-walk ${ns} ${domain}. |				\
+		egrep -i "^.*\.${domain}.[ 	]" |		\
+		awk '/ NS / { print $1}' |			\
+		xz -q -9  >> ${NAMESDIR}/${domain##*.}.xz
+}
+
+nsecWalk() {
+	local auth authtld sd tld
+
+	verbose "Walking zones using NSEC records..."
+
+	if [ ${FORCE} -lt 2 ]; then
+		verbose "Using hard coded list of known NSEC zones..." 2
+		echo "${NSEC_ZONES}" > ${TDIR}/nsec
+		echo "${NSEC_AUTH_ZONES}" > ${TDIR}/nsec-auth
+	else
+		identifyMissingZones
+		identifyNSECZones
+	fi
+
+
+	oIFS="${IFS}"
+	IFS="
+"
+ 	(
+ 	for authtld in $(cat ${TDIR}/nsec-auth); do
+ 		auth=${authtld% *}
+ 		tld=${authtld#* }
+ 		rm -f ${NAMESDIR}/${tld}xz
+ 		ldnsWalk "${tld}" "@${auth}"
+ 	done
+ 	) &
+
+ 	for tld in $(cat ${TDIR}/nsec); do
+ 		rm -f ${NAMESDIR}/${tld}xz
+ 		ldnsWalk "${tld}"
+		for sd in ${NSEC_SUBDOMAINS}; do
+			if [ x"${sd}" = x"${tld}" ]; then
+				nsecWalkSubdomains "${sd}" &
+				break
+			fi
+		done
+ 	done
+
+	IFS="${oIFS}"
+
+	wait
+
+	verbose "NSEC walking done."
+}
+
+nsecWalkSubdomains() {
+	local tld="${1%.}"
+	local sd subdomains
+
+	verbose "ldns-walk'ing subomains for ${tld}..." 3
+
+	subdomains="$(eval echo $(echo \${SUBDOMAINS_$(echo ${tld} | tr '[a-z]' '[A-Z]')}))"
+	oIFS="${IFS}"
+	IFS=" "
+	for sd in ${subdomains}; do
+		ldnsWalk "${sd}.${tld}"
+	done
+	IFS="${oIFS}"
+}
+
+usage() {
+	cat <<EOH
+Usage: ${PROGNAME} [-fhv] [-t type]
+	-f       force updates
+	-h       print this help and exit
+	-t type  which steps to perform (${ALLOWED_TYPES}; default: all)
+	-v       be verbose
+EOH
+}
+
+verbose() {
+	local readonly msg="${1}"
+	local level="${2:-1}"
+	local i=0
+
+	if [ ${level} -le ${VERBOSITY} ]; then
+		while [ ${i} -lt ${level} ]; do
+			printf "=" >&2
+			i=$(( ${i} + 1 ))
+		done
+		echo "> ${msg}" >&2
+	fi
+}
+
+zonesToNames() {
+	local size
+	local tld
+	local m1 m2
+	local pattern
+	verbose "Extracting names from zone files..."
+
+	cd ${ZONESDIR}
+	for f in *; do
+		tld="${f%%.*}"
+
+		if [ x"${f}" = x"*" ]; then
+			break
+		fi
+
+		verbose "${tld}..." 2
+
+		if excludeForced "${tld}"; then
+			verbose "Explicitly excluding ${tld}..." 3
+			continue
+		fi
+
+		if [ ${FORCE} -eq 0 ]; then
+			m1=$(stat -f "%m" ${f})
+			m2=$(stat -f "%m" ${NAMESDIR}/${tld}.xz 2>/dev/null || echo 0)
+			if [ ${m1} -le ${m2} ]; then
+				verbose "Names newer than zone, skipping..." 3
+				continue
+			fi
+		fi
+
+		if [ x"${tld}" = x"root" ]; then
+			zcat ${f} | awk "/^[^.]*.[ 	].*[nN][sS]/ {print \$1}" | \
+				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz
+
+		else
+			size=$(stat -f "%z" ${f})
+			# 52428800 = 50MB; most files are smaller
+			if [ ${size} -gt 52428800 ]; then
+				(
+				zcat ${f} | \
+				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[nN][sS][ 	]/ {print \$1}" | \
+				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
+					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
+				rm -f ${NAMESDIR}/${tld}.xz.not
+				) &
+			else
+				zcat ${f} | \
+				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[nN][sS][ 	]/ {print \$1}" | \
+				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
+					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
+				rm -f ${NAMESDIR}/${tld}.xz.not
+			fi
+		fi
+	done
+
+	wait
+}
+
+###
+### Main
+###
+
+while getopts 'fht:v' opt; do
+	case "${opt}" in
+		f)
+			FORCE=$(( ${FORCE} + 1 ))
+		;;
+		h\?)
+			usage
+			exit 0
+			# NOTREACHED
+		;;
+		t)
+			TYPE="${OPTARG} ${TYPE:-""}"
+		;;
+		v)
+			VERBOSITY=$(( ${VERBOSITY} + 1 ))
+		;;
+		*)
+			usage
+			exit 1
+			# NOTREACHED
+		;;
+	esac
+done
+shift $(($OPTIND - 1))
+
+
+if [ -z "${TYPE}" ]; then
+	TYPE="all"
+else
+	checkTypeArg
+fi
+
+space=$(df -k ${TMPDIR:-/tmp}/ | tail -1 | awk '{print $4}')
+
+if [ ${space} -lt $(( 1024 * 1024 )) ]; then
+	echo "Insufficient temporary space under ${TMPDIR:-/tmp}.  Need at least 1GB." >&2
+	exit 1;
+fi
+
+mkdir -p ${COUNTDIR}
+mkdir -p ${NAMESDIR}
+mkdir -p ${ZONESDIR}
+
+TDIR="$(mktemp -d "${TMPDIR:-/tmp}/${PROGNAME}.XXXX")"
+trap 'cleanup' 0
+touch ${TDIR}/start
+
+if [ ${FORCE} -lt 2 ]; then
+	# With '-f -f', we need to fetchGtlds /
+	# fetchCctlds first, but nsecWalk takes a long
+	# time, so let's kick it off early if we can.
+	if matchType "nsec"; then
+		nsecWalk &
+	fi
+fi
+
+if matchType "gtlds"; then
+	fetchGtlds &
+fi
+
+if matchType "cctlds"; then
+	fetchCctlds
+fi
+
+verbose "Waiting for background jobs..."
+wait
+
+if [ -f "${ZONESDIR}/.xz" ]; then
+	mv "${ZONESDIR}/.xz" "${ZONESDIR}/root.xz"
+fi
+
+if matchType "stats"; then
+	fetchStats
+fi
+
+if [ ${FORCE} -ge 2 ]; then
+	# If we '-f -f'd, then we wanted to generate
+	# the list of zones to nsec walk and thus had
+	# to wait for gtld and cctld retrieval.
+	if matchType "nsec"; then
+		nsecWalk
+	fi
+fi
+
+if matchType "z2n"; then
+	zonesToNames
+fi
+
+if matchType "counts"; then
+	checkTLDs
+	countNamesFiles
+	countTotal
+	checkCountFiles
+fi
+
+if matchType "html"; then
+	generateHTML
+fi

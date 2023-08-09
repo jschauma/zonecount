@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .cw</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .cw</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Cura&ccedil;ao &#127464;&#127484;</p>
+  <p>Source: Published stats found <a href="https://www.uoc.cw/domain-registration/cw-registered-domains">here</a></p>
+  <div>
+    <canvas id="cw"></canvas>
+  </div>
+  <noscript>
+    <img src="cw.png" alt="Zone stats for .cw" width="1024">
+  </noscript>
+
+  <p><a href="cw.png">Static gnuplot image for .cw</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_cw = document.getElementById('cw');
+  new Chart(ctx_cw, {
+          type: 'line',
+          data: {
+            labels: data_cw.labels,
+            datasets: [{
+              data: data_cw.data,
+              label: '.cw',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

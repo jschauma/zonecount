@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .gn</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .gn</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Guinea &#127468;&#127475;</p>
+  <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
+  <div>
+    <canvas id="gn"></canvas>
+  </div>
+  <noscript>
+    <img src="gn.png" alt="Zone stats for .gn" width="1024">
+  </noscript>
+
+  <p><a href="gn.png">Static gnuplot image for .gn</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_gn = document.getElementById('gn');
+  new Chart(ctx_gn, {
+          type: 'line',
+          data: {
+            labels: data_gn.labels,
+            datasets: [{
+              data: data_gn.data,
+              label: '.gn',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

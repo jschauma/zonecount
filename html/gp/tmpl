@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .gp</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .gp</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Guadeloupe &#127468;&#127477;</p>
+  <p>Source: Zone file via <tt>AXFR</tt> from <tt>ns2.nic.gp.</tt>.</p>
+  <div>
+    <canvas id="gp"></canvas>
+  </div>
+  <noscript>
+    <img src="gp.png" alt="Zone stats for .gp" width="1024">
+  </noscript>
+
+  <p><a href="gp.png">Static gnuplot image for .gp</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_gp = document.getElementById('gp');
+  new Chart(ctx_gp, {
+          type: 'line',
+          data: {
+            labels: data_gp.labels,
+            datasets: [{
+              data: data_gp.data,
+              label: '.gp',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

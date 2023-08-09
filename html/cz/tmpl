@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .cz</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .cz</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Czechia &#127464;&#127487;</p>
+  <p>Source: Published stats found <a href="https://stats.nic.cz/fred_domains_latest">here</a></p>
+  <div>
+    <canvas id="cz"></canvas>
+  </div>
+  <noscript>
+    <img src="cz.png" alt="Zone stats for .cz" width="1024">
+  </noscript>
+
+  <p><a href="cz.png">Static gnuplot image for .cz</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_cz = document.getElementById('cz');
+  new Chart(ctx_cz, {
+          type: 'line',
+          data: {
+            labels: data_cz.labels,
+            datasets: [{
+              data: data_cz.data,
+              label: '.cz',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

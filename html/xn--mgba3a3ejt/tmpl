@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .xn--mgba3a3ejt</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .xn--mgba3a3ejt</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>Internationalized domain name ارامكو</p>
+  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  <div>
+    <canvas id="xn__mgba3a3ejt"></canvas>
+  </div>
+  <noscript>
+    <img src="xn--mgba3a3ejt.png" alt="Zone stats for .xn--mgba3a3ejt" width="1024">
+  </noscript>
+
+  <p><a href="xn--mgba3a3ejt.png">Static gnuplot image for .xn--mgba3a3ejt</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_xn__mgba3a3ejt = document.getElementById('xn__mgba3a3ejt');
+  new Chart(ctx_xn__mgba3a3ejt, {
+          type: 'line',
+          data: {
+            labels: data_xn__mgba3a3ejt.labels,
+            datasets: [{
+              data: data_xn__mgba3a3ejt.data,
+              label: '.xn__mgba3a3ejt',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

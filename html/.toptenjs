@@ -1,0 +1,44 @@
+const ctx = document.getElementById('topten');
+
+Chart.register(ChartDataLabels);
+
+new Chart(ctx, {
+  type: 'pie',
+  data: {
+    labels: [::LABELS::
+      "all others"
+    ],
+    datasets: [{ 
+      data: [::DATA::
+        ::TOTAL::
+      ]
+    }]
+  },
+  options: {
+    radius: "85%",
+      plugins: {
+        title: {
+          display: true,
+          text: 'Top Ten TLDs by Domain Count',
+          font: {
+            size: 20
+          },
+        },
+        legend: {
+          display: false
+        },
+        datalabels: {
+          anchor: 'end',
+          font: {
+            weight: 'bold'
+          },
+          color: '#000',
+          formatter: function(value, context) {
+            const total = context.chart.getDatasetMeta(0).total;
+            let percentage = (value * 100 / total).toFixed(2) + "%";
+            return context.chart.data.labels[context.dataIndex] + ": " + percentage;
+          }
+        }
+      }
+    }
+});

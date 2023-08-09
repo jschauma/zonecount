@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .goldpoint</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .goldpoint</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  <div>
+    <canvas id="goldpoint"></canvas>
+  </div>
+  <noscript>
+    <img src="goldpoint.png" alt="Zone stats for .goldpoint" width="1024">
+  </noscript>
+
+  <p><a href="goldpoint.png">Static gnuplot image for .goldpoint</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_goldpoint = document.getElementById('goldpoint');
+  new Chart(ctx_goldpoint, {
+          type: 'line',
+          data: {
+            labels: data_goldpoint.labels,
+            datasets: [{
+              data: data_goldpoint.data,
+              label: '.goldpoint',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

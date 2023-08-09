@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .xn--w4r85el8fhu5dnra</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .xn--w4r85el8fhu5dnra</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>Internationalized domain name 嘉里大酒店</p>
+  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  <div>
+    <canvas id="xn__w4r85el8fhu5dnra"></canvas>
+  </div>
+  <noscript>
+    <img src="xn--w4r85el8fhu5dnra.png" alt="Zone stats for .xn--w4r85el8fhu5dnra" width="1024">
+  </noscript>
+
+  <p><a href="xn--w4r85el8fhu5dnra.png">Static gnuplot image for .xn--w4r85el8fhu5dnra</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_xn__w4r85el8fhu5dnra = document.getElementById('xn__w4r85el8fhu5dnra');
+  new Chart(ctx_xn__w4r85el8fhu5dnra, {
+          type: 'line',
+          data: {
+            labels: data_xn__w4r85el8fhu5dnra.labels,
+            datasets: [{
+              data: data_xn__w4r85el8fhu5dnra.data,
+              label: '.xn__w4r85el8fhu5dnra',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

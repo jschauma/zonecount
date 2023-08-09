@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .az</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .az</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Azerbaijan &#127462;&#127487;</p>
+  <p>Source: Published stats found <a href="https://whois.az/?page_id=783">here</a></p>
+  <div>
+    <canvas id="az"></canvas>
+  </div>
+  <noscript>
+    <img src="az.png" alt="Zone stats for .az" width="1024">
+  </noscript>
+
+  <p><a href="az.png">Static gnuplot image for .az</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script type="application/javascript">
+
+  const ctx_az = document.getElementById('az');
+  new Chart(ctx_az, {
+          type: 'line',
+          data: {
+            labels: data_az.labels,
+            datasets: [{
+              data: data_az.data,
+              label: '.az',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<HTML lang="en">
+  <HEAD>
+    <TITLE>DNS Zone Stats</TITLE>
+    <META http-equiv="content-type" content= "text/html; charset=utf-8">
+    <LINK rel="author" href="mailto:jschauma@netmeister.org">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+
+  </HEAD>
+
+  <BODY>
+  <H1>DNS Zone Stats</H1>
+  <HR style="width: 100%; margin-left:auto; border-style:solid">
+  <small>
+  [<a href="../index.html">homepage</a>]&nbsp;[<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;[<a href="https://mstdn.social/@jschauma">@jschauma</a>]&nbsp;[<a href="/blog/">blog</a>]
+  </small>
+
+  <HR style="width: 100%; margin-left:auto; border-style:solid">
+
+  <p>In this directory you can find graphs displaying
+     the total domain count per TLD zone.</p>
+
+  <p>The data is collected from the <a
+     href="https://czds.icann.org/">gTLD zone
+files</a> as well as the zone files that are available
+<a href="https://github.com/jschauma/tld-zoneinfo">for
+some ccTLDs or the various statistics</a> those zone
+operators make available.</p>
+
+  <p>Some of those stats are not updated daily, but
+only refreshed periodically; other times, jumps in the
+data counts might be explained by data processing
+errors on my part.</p>
+
