@@ -21,7 +21,8 @@
     <ul>
       <li>20230807: added <code><a href="../cn/">.cn</a></code> and <code><a href="../xn--fiqs8s/">.xn--fiqs8s</a></code></li>
       <li>20230808: added UK third-level domains (<code>.co.uk</code>, <code>.org.uk</code>, ...)</li>
-      <li>20230809: added <code>.nz</code> and <code>.ca</code></li>
+      <li>20230809: added <code>.ca</code> and <code>.nz</code></li>
+      <li>20230810: added <code>.mp</code> and <code>.mx</code></li>
     </ul>
   </p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>

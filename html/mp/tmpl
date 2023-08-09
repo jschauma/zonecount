@@ -10,7 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Northern Mariana Islands &#x1f1f2;&#x1f1f5;</p>
-  <p>Source: Zone file via <tt>AXFR</tt> from <code>ns1.nic.mp.</code>.</p>
+  <p>Source: Zone file via <tt>AXFR</tt> from <code>ns1.nic.mp.</code></p>
   <div>
     <canvas id="mp"></canvas>
   </div>
