@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_cipriani = document.getElementById('cipriani');
   new Chart(ctx_cipriani, {

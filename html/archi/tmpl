@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_archi = document.getElementById('archi');
   new Chart(ctx_archi, {

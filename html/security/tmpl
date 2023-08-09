@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_security = document.getElementById('security');
   new Chart(ctx_security, {

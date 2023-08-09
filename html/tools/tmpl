@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_tools = document.getElementById('tools');
   new Chart(ctx_tools, {

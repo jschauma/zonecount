@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_cba = document.getElementById('cba');
   new Chart(ctx_cba, {

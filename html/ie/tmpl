@@ -34,7 +34,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_ie = document.getElementById('ie');
   new Chart(ctx_ie, {

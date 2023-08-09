@@ -34,7 +34,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_xn__unup4y = document.getElementById('xn__unup4y');
   new Chart(ctx_xn__unup4y, {

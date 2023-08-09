@@ -38,7 +38,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_all_tlds = document.getElementById('all_tlds');
   new Chart(ctx_all_tlds, {

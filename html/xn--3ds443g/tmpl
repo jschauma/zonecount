@@ -34,7 +34,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_xn__3ds443g = document.getElementById('xn__3ds443g');
   new Chart(ctx_xn__3ds443g, {

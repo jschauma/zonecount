@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_bananarepublic = document.getElementById('bananarepublic');
   new Chart(ctx_bananarepublic, {

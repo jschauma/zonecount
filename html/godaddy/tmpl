@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_godaddy = document.getElementById('godaddy');
   new Chart(ctx_godaddy, {

@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_lacaixa = document.getElementById('lacaixa');
   new Chart(ctx_lacaixa, {

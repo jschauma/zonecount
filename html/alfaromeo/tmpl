@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_alfaromeo = document.getElementById('alfaromeo');
   new Chart(ctx_alfaromeo, {

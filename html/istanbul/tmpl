@@ -33,7 +33,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_istanbul = document.getElementById('istanbul');
   new Chart(ctx_istanbul, {

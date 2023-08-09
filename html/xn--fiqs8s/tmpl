@@ -35,7 +35,7 @@
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>
-  <script type="application/javascript">
+  <script>
 
   const ctx_xn__fiqs8s = document.getElementById('xn__fiqs8s');
   new Chart(ctx_xn__fiqs8s, {
