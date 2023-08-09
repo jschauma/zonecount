@@ -1643,7 +1643,7 @@ fillTopTen() {
 
   <p>The top ten TLDs by domain name count are:</p>
 
-  <table style="margin: 0 auto; width: 50%; border-width:0">
+  <table style="margin: 0 auto; width: 75%;">
 EOF
 
 	for pair in $(head ${COUNTDIR}/.all-sorted); do
@@ -1651,7 +1651,7 @@ EOF
 		d=${pair##* }
 
 		printf "%'d %s\n" ${n} ${d} |
-			awk -v NUM=${count} '{print "    <tr>\n      <td style=\"width: 5%\">" NUM ".</td>\n      <td style=\"width: 25%; text-align: right\">" $1 "</td>\n      <td>&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n    </tr>\n" }' >> ${HTMLDIR}/.index-middle
+			awk -v NUM=${count} '{print "    <tr>\n      <td style=\"width: 5%\">" NUM ".</td>\n      <td style=\"width: 25%; text-align: right\">" $1 "</td>\n      <td>&nbsp;&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n    </tr>\n" }' >> ${HTMLDIR}/.index-middle
 
 		sum=$(( ${sum} + ${n} ))
 		labels="${labels}^      \"${d}\","
