@@ -81,6 +81,7 @@ ee. zone.internet.ee.
 fj. ns1.fj.
 gp. ns2.nic.gp.
 mw. domwe.sdn.mw.
+mp. ns1.nic.mp.
 nu. zonedata.iis.se.
 ni. ns.ideay.net.ni.
 se. zonedata.iis.se.
@@ -98,6 +99,7 @@ ba.
 be.
 bn.
 br.
+ca.
 ci.
 cl.
 cn.
@@ -138,6 +140,7 @@ net.
 nl.
 no.
 nu.
+nz.
 pl.
 pt.
 rs.
@@ -193,7 +196,7 @@ SUBDOMAINS_MW="ac co com coop edu gov int museum net org"
 SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
 SUBDOMAINS_SL="com edu gov net org"
 
-NOFILL_DOMAINS="cn xn--fiqs8s"
+NOFILL_DOMAINS="cn nz xn--fiqs8s"
 
 ###
 ### Functions
@@ -517,6 +520,21 @@ fetchBrCount() {
 		echo ${DATE} ${count} >> ${COUNTDIR}/br
 	fi
 }
+
+fetchCaCount() {
+	local count
+
+	verbose "ca (name count only)..." 2
+
+	count="$(curl -s -H 'User-Agent: Mozilla/5.0' https://www.cira.ca/en/ | \
+		sed -n -e 's/.*c-site-footer_counter_label.*bottom">\([0-9,]*\)<.*/\1/p' | \
+		tr -d ',')"
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ca
+	fi
+}
+
 
 fetchCctlds() {
 	local cctld
@@ -1538,6 +1556,7 @@ fetchStats() {
 	fetchBeCount
 	fetchBnCount
 	fetchBrCount
+	fetchCaCount
 	fetchCiCount
 	fetchClCount
 	fetchCwCount
@@ -2035,7 +2054,6 @@ while getopts 'fht:v' opt; do
 	esac
 done
 shift $(($OPTIND - 1))
-
 
 if [ -z "${TYPE}" ]; then
 	TYPE="all"

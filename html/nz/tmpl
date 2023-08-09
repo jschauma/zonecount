@@ -1,0 +1,64 @@
+<html lang="en">
+  <head>
+    <title>Zone stats: # of domains in .nz</title>
+    <meta http-equiv="content-type" content= "text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .nz</h1>
+
+  <hr style="border-style:solid; width:100%;">
+  <p>ccTLD for New Zealand &#127475;&#127487;</p>
+  <p>Source: Manually compiled statistics from <a href="https://docs.internetnz.nz/registry/stats/">here</a>.</p>
+
+  <div>
+    <canvas id="nz"></canvas>
+  </div>
+  <noscript>
+    <img src="nz.png" alt="Zone stats for .nz" width="1024">
+  </noscript>
+
+  <p><a href="nz.png">Static gnuplot image for .nz</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr style="border-style:solid; width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script>
+
+  const ctx_nz = document.getElementById('nz');
+  new Chart(ctx_nz, {
+          type: 'line',
+          data: {
+            labels: data_nz.labels,
+            datasets: [{
+              data: data_nz.data,
+              label: '.nz',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>
