@@ -60,7 +60,7 @@ PROGNAME="${0##*/}"
 TDIR=""
 VERBOSITY=0
 
-ALLOWED_TYPES="all cctlds counts gtlds html nsec stats z2n"
+ALLOWED_TYPES="all cctlds counts git gtlds html nsec stats z2n"
 TYPE=""
 
 BASEDIR="/misc/dnsdata/zonecount"
@@ -1800,6 +1800,12 @@ EOF
 	chmod -R a+rX /htdocs/netmeister.org/tldstats/
 }
 
+gitCommit() {
+	verbose "Committing files to git..."
+
+	git commit . -m "${DATE}"
+}
+
 identifyMissingZones() {
 	verbose "Identifying missing zones..."
 	
@@ -2102,4 +2108,8 @@ fi
 
 if matchType "html"; then
 	generateHTML
+fi
+
+if matchType "git"; then
+	gitCommit
 fi
