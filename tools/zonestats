@@ -1760,7 +1760,7 @@ EOF
 	for f in *; do
 		nofill=""
 		verbose "${f}..." 2
-		sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/plot | gnuplot 2>/dev/null
+		sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/.plot | gnuplot 2>/dev/null
 		for nf in ${NOFILL_DOMAINS}; do
 			if [ "${f}" = "${nf}" ]; then
 				nofill="nofill"
