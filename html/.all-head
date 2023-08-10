@@ -11,7 +11,7 @@
     <hr style="border-style:solid; width:100%;">
 
     <p><a href="index.html">TLD Zone Stats</a>: TLDs by count<sup>*</sup> of domains as of ::DATE::</p>
-    <p><small>Note: only counting domains for which data is available (several large ccTLDs do not provide this information).</small></p>
+    <p><small><sup>*</sup>only counting domains for which data is available</small></p>
     <table style="margin: 0 auto; border-width: 0">
       <tr>
         <td valign="top">

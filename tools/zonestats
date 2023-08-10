@@ -90,7 +90,8 @@ xn--ygbi2ammx. ns1.gov.ps."
 
 FORCED_ZONES="com net nu se"
 
-HAVE_STATS="am.
+HAVE_STATS="ae.
+am.
 ar.
 at.
 au.
@@ -403,6 +404,21 @@ excludeForced() {
 
 	return 1
 }
+
+fetchAeCount() {
+	local count
+
+	verbose "ae (name count only)..." 2
+
+	count=$(curl -s https://tdra.gov.ae/aeda | \
+			sed -n -e 's/.*<p class="font-weight-bold.*>\([0-9,]*\)<.*/\1/p' | \
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/ae
+	fi
+}
+
 
 fetchAmCount() {
 	local count
@@ -1596,6 +1612,7 @@ fetchStats() {
 		fetchNuOrSeCount "se"
 	fi
 
+	fetchAeCount
 	fetchAmCount
 	fetchArCount
 	fetchAtCount
