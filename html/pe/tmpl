@@ -1,30 +1,24 @@
 <html>
   <head>
-    <title>Zone stats: # of domains in .all-tlds</title>
+    <title>Zone stats: # of domains in .pe</title>
     <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
     <link rel="stylesheet" type="text/css" href="/blog/blog.css">
   </head>
   <body>
 
-  <h1>Zone stats: cumulative # of domains in all TLDs</h1>
+  <h1>Zone stats: # of domains in .pe</h1>
 
   <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Peru &#127477;&#127466;</p>
+  <p>Source: Published stats found <a href="https://punto.pe/">here</a></p>
   <div>
-    <canvas id="all_tlds"></canvas>
+    <canvas id="pe"></canvas>
   </div>
   <noscript>
-    <img src="all-tlds.png" alt="Zone stats for all TLDs" width="1024">
+    <img src="pe.png" alt="Zone stats for .pe" width="1024">
   </noscript>
 
-  <p><a href="all-tlds.png">Static gnuplot image for all TLDs</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
-  <p>Spikes:
-    <ul>
-      <li>20230807: added <code><a href="../cn/">.cn</a></code> and <code><a href="../xn--fiqs8s/">.xn--fiqs8s</a></code></li>
-      <li>20230808: added UK third-level domains (<code>.co.uk</code>, <code>.org.uk</code>, ...)</li>
-      <li>20230809: added <code>.ca</code> and <code>.nz</code></li>
-      <li>20230810: added <code>.mp</code>, <code>.mx</code>, <code>.my</code>, and <code>.pe</code></li>
-    </ul>
-  </p>
+  <p><a href="pe.png">Static gnuplot image for .pe</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
 
@@ -42,14 +36,14 @@
   <script src="./data.js"></script>
   <script>
 
-  const ctx_all_tlds = document.getElementById('all_tlds');
-  new Chart(ctx_all_tlds, {
+  const ctx_pe = document.getElementById('pe');
+  new Chart(ctx_pe, {
           type: 'line',
           data: {
-            labels: data_all_tlds.labels,
+            labels: data_pe.labels,
             datasets: [{
-              data: data_all_tlds.data,
-              label: '.all_tlds',
+              data: data_pe.data,
+              label: '.pe',
               fill: false,
               borderColor: 'rgb(0, 0, 255)',
               tension: 0.1

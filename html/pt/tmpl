@@ -10,7 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Portugal &#127477;&#127481;</p>
-  <p>Source: Published stats found <a href="https://www.pt.pt/en/data-protection/zone-file-access-policy/">here</a></p>
+  <p>Source: Published stats found <a href="https://www.pt.pt/pt/estatisticas/">here</a></p>
   <div>
     <canvas id="pt"></canvas>
   </div>

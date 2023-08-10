@@ -138,11 +138,13 @@ ma.
 mk.
 mp.
 mx.
+my.
 net.
 nl.
 no.
 nu.
 nz.
+pe.
 pl.
 pt.
 rs.
@@ -1178,6 +1180,21 @@ fetchMxCount() {
 	fi
 }
 
+fetchMyCount() {
+	local count
+
+	verbose "my (name count only)..." 2
+
+	count=$(curl -s https://mynic.my/media/statistics/ |		\
+			grep -B1 '</tr>' |				\
+			grep -m 1 '<td class="tableexport-string">' |	\
+			sed -e 's/.*>\(.*\)<.*/\1/' |			\
+			tr -d ',')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/my
+	fi
+}
 
 fetchNlCount() {
 	local count
@@ -1220,6 +1237,19 @@ fetchNuOrSeCount() {
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/${which}
+	fi
+}
+
+fetchPeCount() {
+	local count
+
+	verbose "pe (name count only)..." 2
+
+	count=$(curl -s https://punto.pe/ | \
+			sed -n -e 's|^.*<span class="num">\([0-9]*\).*|\1|p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/pe
 	fi
 }
 
@@ -1610,8 +1640,10 @@ fetchStats() {
 	fetchMaCount
 	fetchMkCount
 	fetchMxCount
+	fetchMyCount
 	fetchNlCount
 	fetchNoCount
+	fetchPeCount
 	fetchPlCount
 	fetchPtCount
 	fetchRsCount
