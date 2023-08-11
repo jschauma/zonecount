@@ -2033,7 +2033,6 @@ printLinkTable() {
 	if [ x"${which}" = x"valid" ]; then
 		ignore=$(sed -e 's/\.$//' ${TDIR}/.extra | tr '\n' '|' | sed -e 's/|$//')
 		files=$(ls | egrep -v "(${ignore})")
-pwd
 	else
 		files=$(sed -e 's/\.$//' ${TDIR}/.extra)
 	fi
