@@ -265,28 +265,27 @@ axfr() {
 checkTLDs() {
 	verbose "Checking TLDs..."
 
-	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${TDIR}/tlds
+	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${COUNTDIR}/.tlds
 	cd ${COUNTDIR}
 	for tld in *; do
 		if [ "${tld}" = "root" ]; then
 			continue
 		fi
 		echo "${tld}." >> ${TDIR}/found
-		if ! egrep -q "^${tld}.$" ${TDIR}/tlds; then
+		if ! egrep -q "^${tld}.$" .tlds; then
 			if [ -f "${NAMESDIR}/${tld}.xz" ]; then
 				verbose "${tld} not in root zone" 2
 				rm -f ${NAMESDIR}/${tld}.xz	\
 					${ZONESDIR}/${tld}.xz	\
 					${ZONESDIR}/${tld}.txt.gz
-				# one date without data
-				echo "${DATE}" >> ${COUNTDIR}/${tld}
 			fi
 		fi
 	done
 
-	comm -2 -3 ${TDIR}/tlds ${TDIR}/found > .missing
+	comm -2 -3 .tlds ${TDIR}/found > .missing
+	comm -1 -3 .tlds ${TDIR}/found > .extra
 
-	rm ${TDIR}/tlds ${TDIR}/found
+	rm ${TDIR}/found
 }
 
 checkCountFiles() {
@@ -378,7 +377,8 @@ countTotal() {
 	verbose "Counting total number of domains..."
 
 	cd ${COUNTDIR}
-	ls | grep -v all-tlds | xargs tail -1 -q | awk -v D=${DATE} '{ if (NF > 1 ) { sum += $2;}} END { print D " " sum }' >> all-tlds 
+	ignore=$(tr '\n' '|' <.extra)
+	ls | egrep -v "(${ignore}all-tlds)" | xargs tail -1 -q | awk -v D=${DATE} '{ if (NF > 1 ) { sum += $2;}} END { print D " " sum }' >> all-tlds 
 
 	verbose "Generating json data..."
 	sh ${BASEDIR}/tools/count2json ${COUNTDIR} | xz -9 > ${HTMLDIR}/all-tlds.json.xz 2>/dev/null
@@ -1772,21 +1772,22 @@ EOF
 generateHTML() {
 	verbose "Generating HTML and graphs..."
 	local v=""
-	local num=0
 	local count=0
-	local total=0
 	local percent=0
 	local grandTotal=0
+	local numExtra numFound numMissing numTLDs numValid
 
 	if [ ${VERBOSITY} -gt 2 ]; then
 		v="v"
 	fi
 
 	cd ${COUNTDIR}
-	num=$( ls | wc -l )
-	numMissing=$(wc -l < ${COUNTDIR}/.missing)
-	total=$(( ${numMissing} + ${num} ))
-	percent=$( printf "%.2f" $(echo "${num}/${total} * 100" | bc -l) )
+	numFound=$( ls | wc -l | tr -d ' ')
+	numMissing=$(wc -l < ${COUNTDIR}/.missing | tr -d ' ')
+	numExtra=$(wc -l < ${COUNTDIR}/.extra | tr -d ' ')
+	numTLDs=$(wc -l < ${COUNTDIR}/.tlds | tr -d ' ')
+	numValid=$(( ${numFound} - ${numExtra} ))
+	percent=$( printf "%.2f" $(echo "${numValid}/${numTLDs} * 100" | bc -l) )
 	grandTotal=$( printf "%'d" $(tail -1 all-tlds | awk '{print $2}'))
 
 	verbose "Gathering top ten and all stats..." 2
@@ -1820,9 +1821,9 @@ generateHTML() {
 
 	# index.html
 	cat >${HTMLDIR}/.index-middle <<EOF
-  <p>As of $(date +%Y-%m-%d), this page shows stats for ${num}/${total} (~${percent}%)
-     TLDs, counting a total of ${grandTotal} second-level domains.  You can download
-     a JSON file containing all stats from <a href="all-tlds.json.xz">here</a>.</p>
+  <p>As of $(date +%Y-%m-%d), this page shows stats for ${numFound} TLDs (${numValid}/${numTLDs} or around ${percent}% of currently valid TLDs; ${numExtra} now in-active TLDs),
+     counting a total of ${grandTotal} second-level domains.  You can download
+     a compressed JSON file containing all stats from <a href="all-tlds.json.xz">here</a>.</p>
 
 EOF
 	fillTopTen
@@ -1836,7 +1837,7 @@ EOF
 
   <h2 id="graphs">Zone Stat Graphs</h2>
 
-  <p>Zone stat line graphs for ${num} TLDs are available below:</p>
+  <p>Zone stat line graphs for ${numFound} TLDs are available below:</p>
 
   <p><a href="all-tlds/">All TLDs combined</a></p>
 
@@ -1861,7 +1862,7 @@ EOF
 		fi
 		printf "        <li><a href=\"${f}/\">${f}</a></li>\n"  >> ${HTMLDIR}/.index-middle
 		count=$(( ${count} + 1 ))
-		if [ ${count} -eq $(( ${num} / 4 + 1)) ]; then
+		if [ ${count} -eq $(( ${numFound} / 4 + 1)) ]; then
 			printf "    </ul>\n  </td>\n  <td style=\"vertical-align: top\">\n    <ul>\n" >> ${HTMLDIR}/.index-middle
 			count=0
 		fi
