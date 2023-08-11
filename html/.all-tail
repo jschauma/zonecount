@@ -56,7 +56,6 @@ new Chart(ctx_bar, {
         data: {
           labels: data_bar.labels,
           datasets: [{
-            label: '# of TLDs by domain count',
             data: data_bar.data,
             backgroundColor: [
               'rgba(255, 99, 132, 0.2)',
