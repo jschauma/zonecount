@@ -19,19 +19,17 @@
   <HR style="width: 100%">
 
   <p>On this page you can find links to graphs displaying
-     the total domain count per TLD zone. (See <a
-     href="/blog/tldstats.html">this page</a> for more
-     background information.)</p>
-
-  <p>The data is collected from the <a
-     href="https://czds.icann.org/">gTLD zone
-files</a> as well as the zone files that are available
-<a href="https://github.com/jschauma/tld-zoneinfo">for
-some ccTLDs or the various statistics</a> those zone
-operators make available.</p>
+     the total domain count per TLD zone.  The data collected
+     stems from the <a href="https://czds.icann.org/">gTLD zone
+     files</a> as well as the zone files or the various
+     statistics that are available
+     <a href="https://github.com/jschauma/tld-zoneinfo">for
+     some of the ccTLDs</a>.  (See <a
+     href="/blog/tldstats.html">this page</a> for a
+     little bit more background information.)</p>
 
   <p>Some of those stats are not updated daily, but
-only refreshed periodically; other times, jumps in the
-domain counts might be explained by data processing
-errors on my part.</p>
+     only refreshed periodically; other times, jumps in the
+     domain counts might be explained by data processing
+     errors on my part.</p>
 

@@ -1734,7 +1734,6 @@ fillTopTen() {
 	count=1
 
 	cat >>${HTMLDIR}/.index-middle <<EOF
-
   <h2 id="topten">Top Ten</h2>
 
   <p>The top ten TLDs by domain name count are:</p>
