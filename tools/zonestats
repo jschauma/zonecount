@@ -299,7 +299,7 @@ checkCountFiles() {
 		diff=0
 
 		if [ "${f}" -ot "${TDIR}/start" ]; then
-			if [ ${FORCE} -eq 0 ]; then
+			if [ ${FORCE} -lt 2 ]; then
 				verbose "${f} not touched, skipping..." 2
 				continue
 			fi
