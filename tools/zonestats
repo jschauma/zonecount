@@ -265,14 +265,14 @@ axfr() {
 checkTLDs() {
 	verbose "Checking TLDs..."
 
-	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${COUNTDIR}/.tlds
+	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${TDIR}/.tlds
 	cd ${COUNTDIR}
 	for tld in *; do
 		if [ "${tld}" = "root" ]; then
 			continue
 		fi
 		echo "${tld}." >> ${TDIR}/found
-		if ! egrep -q "^${tld}.$" .tlds; then
+		if ! egrep -q "^${tld}.$" ${TDIR}/.tlds; then
 			if [ -f "${NAMESDIR}/${tld}.xz" ]; then
 				verbose "${tld} not in root zone" 2
 				rm -f ${NAMESDIR}/${tld}.xz	\
@@ -282,8 +282,8 @@ checkTLDs() {
 		fi
 	done
 
-	comm -2 -3 .tlds ${TDIR}/found > .missing
-	comm -1 -3 .tlds ${TDIR}/found | grep -v all-tlds > .extra
+	comm -2 -3 ${TDIR}/.tlds ${TDIR}/found > ${TDIR}/.missing
+	comm -1 -3 ${TDIR}/.tlds ${TDIR}/found | grep -v all-tlds > ${TDIR}/.extra
 
 	rm ${TDIR}/found
 }
@@ -297,6 +297,14 @@ checkCountFiles() {
 	cd ${COUNTDIR}
 	for f in *; do
 		diff=0
+
+		if [ "${f}" -ot "${TDIR}/start" ]; then
+			if [ ${FORCE} -eq 0 ]; then
+				verbose "${f} not touched, skipping..." 2
+				continue
+			fi
+		fi
+
 		prev=$(tail -2 ${f} | head -1 | awk '{print $NF}')
 		last=$(tail -1 ${f} | awk '{print $NF}')
 		if [ -z ${last} -o -z ${prev} ]; then
@@ -377,7 +385,7 @@ countTotal() {
 	verbose "Counting total number of domains..."
 
 	cd ${COUNTDIR}
-	ignore=$(tr '\n' '|' <.extra)
+	ignore=$(tr '\n' '|' < ${TDIR}/.extra)
 	ls | egrep -v "(${ignore}all-tlds)" | xargs tail -1 -q | awk -v D=${DATE} '{ if (NF > 1 ) { sum += $2;}} END { print D " " sum }' >> all-tlds 
 
 	verbose "Generating json data..."
@@ -1779,9 +1787,9 @@ generateHTML() {
 
 	cd ${COUNTDIR}
 	numFound=$( ls | wc -l | tr -d ' ')
-	numMissing=$(wc -l < ${COUNTDIR}/.missing | tr -d ' ')
-	numExtra=$(wc -l <${COUNTDIR}/.extra | tr -d ' ')
-	numTLDs=$(wc -l < ${COUNTDIR}/.tlds | tr -d ' ')
+	numMissing=$(wc -l < ${TDIR}/.missing | tr -d ' ')
+	numExtra=$(wc -l < ${TDIR}/.extra | tr -d ' ')
+	numTLDs=$(wc -l < ${TDIR}/.tlds | tr -d ' ')
 	numValid=$(( ${numFound} - ${numExtra} ))
 	percent=$( printf "%.2f" $(echo "${numValid}/${numTLDs} * 100" | bc -l) )
 	grandTotal=$( printf "%'d" $(tail -1 all-tlds | awk '{print $2}'))
@@ -1861,7 +1869,7 @@ EOF
 EOF
 	printLinkTable "${numExtra}" "extra"
 
-	missing=$(tr '\n' ' ' <${COUNTDIR}/.missing)
+	missing=$(tr '\n' ' ' < ${TDIR}/.missing)
 	cat >>${HTMLDIR}/.index-middle <<EOF
         </ul>
       </td>
@@ -2015,11 +2023,16 @@ printLinkTable() {
 	local count files nofill
 
 	if [ x"${which}" = x"valid" ]; then
-		ignore=$(sed -e 's/\.$//' .extra | tr '\n' '|' | sed -e 's/|$//')
+		ignore=$(sed -e 's/\.$//' ${TDIR}/.extra | tr '\n' '|' | sed -e 's/|$//')
 		files=$(ls | egrep -v "(${ignore})")
+pwd
 	else
-		files=$(sed -e 's/\.$//' .extra)
+		files=$(sed -e 's/\.$//' ${TDIR}/.extra)
 	fi
+
+	oIFS="${IFS}"
+	IFS=" 
+"
 
 	count=0
 	for f in ${files}; do
@@ -2040,6 +2053,8 @@ printLinkTable() {
 			count=0
 		fi
 	done
+
+	IFS="${oIFS}"
 }
 
 usage() {
