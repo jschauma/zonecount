@@ -3,10 +3,9 @@
     <title>Zone stats: # of domains in the Top Ten TLDs</title>
     <link rel="stylesheet" type="text/css" href="/blog/blog.css">
   </head>
-  <body>
-
-  <div>
-    <canvas id="topten"></canvas>
+  <body style="margin-top: 0px; margin-bottom: 0px">
+  <div style="margin-top: 0px">
+    <canvas id="topten" style="margin-top: 0px"></canvas>
   </div>
   <script src="/tldstats/chart.js"></script>
   <script src="/tldstats/datalabels.js"></script>

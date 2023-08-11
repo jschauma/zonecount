@@ -1739,7 +1739,10 @@ fillTopTen() {
 
   <p>The top ten TLDs by domain name count are:</p>
 
-  <table style="margin: 0 auto; width: 75%;">
+  <table style="margin: 0 auto">
+    <tr>
+      <td style="vertical-align: top">
+        <table style="margin: 0 auto">
 EOF
 
 	for pair in $(head ${COUNTDIR}/.all-sorted); do
@@ -1747,7 +1750,7 @@ EOF
 		d=${pair##* }
 
 		printf "%'d %s\n" ${n} ${d} |
-			awk -v NUM=${count} '{print "    <tr>\n      <td style=\"width: 5%\">" NUM ".</td>\n      <td style=\"width: 25%; text-align: right\">" $1 "</td>\n      <td>&nbsp;&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n    </tr>\n" }' >> ${HTMLDIR}/.index-middle
+			awk -v NUM=${count} '{print "          <tr>\n            <td style=\"width: 5%\">" NUM ".</td>\n            <td style=\"width: 25%; text-align: right\">" $1 "</td>\n            <td>&nbsp;&nbsp;<a href=\"" $2 "\">" $2 "</a></td>\n          </tr>\n" }' >> ${HTMLDIR}/.index-middle
 
 		sum=$(( ${sum} + ${n} ))
 		labels="${labels}^      \"${d}\","
@@ -1770,6 +1773,12 @@ EOF
 	cat ${HTMLDIR}/.topten-tail >> ${HTMLDIR}/topten.html
 
 	cat >>${HTMLDIR}/.index-middle <<EOF
+        </table>
+      </td>
+      <td style="vertial-align: top; width: 50%">
+        <iframe src="/tldstats/topten.html" width="400" height="350" style="margin: 0; padding: 0px 0; border: 0"></iframe>
+      </td>
+    </tr>
   </table>
 
   <p>These top ten TLDs account for approximately ${percent}% of all domain names.</p>
