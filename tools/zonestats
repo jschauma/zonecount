@@ -1080,19 +1080,27 @@ fetchItCount() {
 }
 
 fetchJoCount() {
-	local count
+	local count xncount
 
 	verbose "jo and xn--mgbayh7gpa (name count only)..." 2
 
-	count=$(curl -s https://www.dns.jo/stat.aspx |			\
-		tr '<' '\n' | 						\
-		sed -n -e "s/^TD align='center'>\([0-9]*\)$/\1/p" |	\
-		awk '{last=$1; sum += $1 } END { print (sum - last) " " last }')
+	# missing intermediate cert
+	curl -k -s https://dns.jo/DomStat.aspx | sed -e 's|<TR||g' | tr '' '\n' > ${TDIR}/f
+
+	xncount=$(<${TDIR}/f grep -B1 "<B>Total</B>" | head -1 | sed -e 's/.*>\([0-9]*\)<\/TD><.*/\1/')
+	if [ -n "${xncount}" ]; then
+		echo ${DATE} ${xncount} >> ${COUNTDIR}/xn--mgbayh7gpa
+	fi
+
+	count=$(<${TDIR}/f sed -n -e 's|.*>Total.*<B>\([0-9]*\)</B></font></TD><TD.*|\1|p')
 
 	if [ -n "${count}" ]; then
-		echo ${DATE} ${count% *} >> ${COUNTDIR}/jo
-		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--mgbayh7gpa
+		if [ -n "${xncount}" ]; then
+			count=$(( ${count} - ${xncount} ))
+		fi
+		echo ${DATE} ${count} >> ${COUNTDIR}/jo
 	fi
+	rm -f ${TDIR}/f
 }
 
 fetchJpCount() {
