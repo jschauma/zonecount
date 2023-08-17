@@ -1451,21 +1451,32 @@ fetchTrCount() {
 }
 
 fetchTwCount() {
-	local count
+	local twcount idncount
 
 	verbose "tw and xn--kpry57d (name count only)..." 2
 
-	curl -f -s -o ${TDIR}/tw https://www.twnic.tw/dnjson.txt || return
-	count=$(jq -r '[to_entries | .[] | select((.key != "") and (.key | endswith(".台灣") | not)) | .value | last | last] | add' <${TDIR}/tw)
+	curl -f -s https://www.twnic.tw/dnjson.txt |			\
+		sed -e 's/, /,@/g' |					\
+                tr '@' '\n' > ${TDIR}/tw
 
-	if [ -n "${count}" ]; then
-		echo ${DATE} ${count} >> ${COUNTDIR}/tw
+	idncount=0
+	idncount=$(<${TDIR}/tw awk -F '[' '/台灣/ { p=1 }; /]]/ {
+				if (p == 1) {
+					sum += gensub("]].*", "", "g", $NF);
+					p=0;
+				}}
+				END { print sum }');
+
+	if [ -n "${idncount}" ]; then
+		echo ${DATE} ${idncount} >> ${COUNTDIR}/xn--kpry57d
 	fi
 
-	count=$(jq -r '[to_entries | .[] | select( .key | endswith(".台灣")) | .value | last | last] | add' <${TDIR}/tw)
+	twcount=$(<${TDIR}/tw grep ']]' |				\
+			sed -e 's/.*\[\([0-9]*\).*/\1/' |		\
+			awk -v I=${idncount} '{sum += $1;} END { print sum - I }')
 
-	if [ -n "${count}" ]; then
-		echo ${DATE} ${count} >> ${COUNTDIR}/xn--kpry57d
+	if [ -n "${twcount}" ]; then
+		echo ${DATE} ${twcount} >> ${COUNTDIR}/tw
 	fi
 
 	rm -f ${TDIR}/tw
