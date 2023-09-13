@@ -79,6 +79,9 @@ new Chart(ctx_bar, {
         options: {
           plugins: {
             tooltip: {
+              legend: {
+                display: false
+              },
               callbacks: {
                 afterLabel: function(context) {
                     var sum = context.dataset.data.reduce((sum, item) => {

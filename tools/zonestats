@@ -201,7 +201,7 @@ SUBDOMAINS_MW="ac co com coop edu gov int museum net org"
 SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
 SUBDOMAINS_SL="com edu gov net org"
 
-NOFILL_DOMAINS="cn nz xn--fiqs8s"
+NOFILL_DOMAINS="cn ng nz xn--fiqs8s"
 
 ###
 ### Functions
@@ -1324,7 +1324,8 @@ fetchRsCount() {
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count%% *} >> ${COUNTDIR}/rs
-		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--90a3ac
+		echo ${DATE} ${count#* } | \
+			sed -e 's/ 0*/ /' >> ${COUNTDIR}/xn--90a3ac
 	fi
 }
 
@@ -1475,7 +1476,7 @@ fetchTwCount() {
 			sed -e 's/.*\[\([0-9]*\).*/\1/' |		\
 			awk -v I=${idncount} '{sum += $1;} END { print sum - I }')
 
-	if [ -n "${twcount}" ]; then
+	if [ -n "${twcount}" ] && [ ${twcount} -gt 0 ]; then
 		echo ${DATE} ${twcount} >> ${COUNTDIR}/tw
 	fi
 
@@ -2003,6 +2004,7 @@ nsecWalk() {
 	IFS="
 "
  	(
+	ulimit -t 3600
  	for authtld in $(cat ${TDIR}/nsec-auth); do
  		auth=${authtld% *}
  		tld=${authtld#* }
@@ -2011,6 +2013,8 @@ nsecWalk() {
  	done
  	) &
 
+	(
+	ulimit -t 3600
  	for tld in $(cat ${TDIR}/nsec); do
  		rm -f ${NAMESDIR}/${tld}xz
  		ldnsWalk "${tld}"
@@ -2021,6 +2025,7 @@ nsecWalk() {
 			fi
 		done
  	done
+	)
 
 	IFS="${oIFS}"
 

@@ -1,24 +1,24 @@
 <html>
   <head>
-    <title>Zone stats: # of domains in .xn--q9jyb4c</title>
+    <title>Zone stats: # of domains in .ng</title>
     <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
     <link rel="stylesheet" type="text/css" href="/blog/blog.css">
   </head>
   <body>
 
-  <h1>Zone stats: # of domains in .xn--q9jyb4c</h1>
+  <h1>Zone stats: # of domains in .ng</h1>
 
   <hr class="noshade" style="width:100%;">
-  <p>Internationalized domain name みんな (<em lang="jp">minna</em>, everyone)</p>
-  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  <p>ccTLD for Nigeria &#127475;&#127468;</p>
+  <p>Source: Manually pulled out of <a href="https://nira.org.ng/agm-reports/">NiRA Reports</a></p>
   <div>
-    <canvas id="xn__q9jyb4c"></canvas>
+    <canvas id="ng"></canvas>
   </div>
   <noscript>
-    <img src="xn--q9jyb4c.png" alt="Zone stats for .xn--q9jyb4c" width="1024">
+    <img src="ng.png" alt="Zone stats for .ng" width="1024">
   </noscript>
 
-  <p><a href="xn--q9jyb4c.png">Static gnuplot image for .xn--q9jyb4c</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p><a href="ng.png">Static gnuplot image for .ng</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
 
@@ -36,14 +36,14 @@
   <script src="./data.js"></script>
   <script>
 
-  const ctx_xn__q9jyb4c = document.getElementById('xn__q9jyb4c');
-  new Chart(ctx_xn__q9jyb4c, {
+  const ctx_ng = document.getElementById('ng');
+  new Chart(ctx_ng, {
           type: 'line',
           data: {
-            labels: data_xn__q9jyb4c.labels,
+            labels: data_ng.labels,
             datasets: [{
-              data: data_xn__q9jyb4c.data,
-              label: '.xn__q9jyb4c',
+              data: data_ng.data,
+              label: '.ng',
               fill: false,
               borderColor: 'rgb(0, 0, 255)',
               tension: 0.1
