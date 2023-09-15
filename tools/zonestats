@@ -60,7 +60,7 @@ PROGNAME="${0##*/}"
 TDIR=""
 VERBOSITY=0
 
-ALLOWED_TYPES="all cctlds counts git gtlds html nsec stats z2n"
+ALLOWED_TYPES="all cctlds counts git gtlds html icann nsec stats z2n"
 TYPE=""
 
 BASEDIR="/misc/dnsdata/zonecount"
@@ -201,7 +201,9 @@ SUBDOMAINS_MW="ac co com coop edu gov int museum net org"
 SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
 SUBDOMAINS_SL="com edu gov net org"
 
-NOFILL_DOMAINS="cn ng nz xn--fiqs8s"
+ICANN_STATS="moscow shaw spa voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
+
+NOFILL_DOMAINS="cn ng nz xn--fiqs8s ${ICANN_STATS}"
 
 ###
 ### Functions
@@ -981,6 +983,38 @@ fetchHuCount() {
 	fi
 }
 
+fetchIcannStats() {
+	local count link tld
+
+	verbose "Fetching delayed stats from ICANN..."
+
+	for tld in ${ICANN_STATS}; do
+		verbose "${tld} (delayed stats)..." 2
+		link=$(curl -s https://www.icann.org/resources/pages/registry-reports/ | \
+			sed -n -e "s|.*\(/resources/pages/${tld}-.*-en\).*|\1|p")
+		if [ -z "${link}" ]; then
+			continue
+		fi
+		link=$(curl -s https://www.icann.org${link} | \
+			sed -n -e '/href="\/sites/{ s|.*\(/sites.*csv\).*|\1|p; q;}')
+		if [ -z "${link}" ]; then
+			continue
+		fi
+		count=$(curl -s https://www.icann.org${link} | \
+			awk -F, '/^Total/ { print $3; }')
+
+		# Links have YYYYMM, we tack on 28 as
+		# the last possible day of every month.
+		date="$(echo "${link}" | sed -e "s/.*${tld}-transactions-\([0-9]*\)-.*/\1/")28"
+
+		if [ -n "${count}" ]; then
+			echo ${date} ${count} >> ${COUNTDIR}/${tld}
+			uniq ${COUNTDIR}/${tld} > ${COUNTDIR}/.x
+			mv ${COUNTDIR}/.x ${COUNTDIR}/${tld}
+		fi
+	done
+}
+
 fetchIdCount() {
 	local count
 
@@ -1518,9 +1552,12 @@ fetchUkCount() {
 
 	count=$(curl -s "https://www.nominet.uk/news/reports-statistics/uk-register-statistics-$(date +%Y)/" | \
 			grep total-domains-under-management-at-end-of-month |	\
-			perl -pe 's|.*?class="Third-level">([0-9,]+)</td><td .*?class="Second-level">([0-9,]+)</td></tr></tbody>.*|$1 $2|' | \
+			perl -pe 's/<\/section>/\n/' | \
+			head -1 | \
+			perl -pe 's|.*class="Third-level">([0-9,]+)</td><td .*?class="Second-level">([0-9,]+)</td></tr></tbody>.*|$1 $2|' | \
 			tr -d ',')
 
+echo $count
 	if [ -n "${count}" ]; then
 		count=$(echo $count | tr ' ' '+' | bc)
 		echo ${DATE} ${count} >> ${COUNTDIR}/uk
@@ -2247,6 +2284,10 @@ fi
 
 if matchType "stats"; then
 	fetchStats
+fi
+
+if matchType "icann"; then
+	fetchIcannStats
 fi
 
 if [ ${FORCE} -ge 2 ]; then

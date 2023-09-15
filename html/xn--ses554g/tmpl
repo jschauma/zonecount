@@ -1,24 +1,23 @@
 <html>
   <head>
-    <title>Zone stats: # of domains in .xn--80aswg</title>
+    <title>Zone stats: # of domains in .xn--ses554g</title>
     <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
     <link rel="stylesheet" type="text/css" href="/blog/blog.css">
   </head>
   <body>
 
-  <h1>Zone stats: # of domains in .xn--80aswg</h1>
+  <h1>Zone stats: # of domains in 网址 ("(written) Chinese (language) network")</h1>
 
   <hr class="noshade" style="width:100%;">
-  <p>Internationalized domain name сайт ("site")</p>
-  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
   <div>
-    <canvas id="xn__80aswg"></canvas>
+    <canvas id="xn--ses554g"></canvas>
   </div>
   <noscript>
-    <img src="xn--80aswg.png" alt="Zone stats for .xn--80aswg" width="1024">
+    <img src="xn--ses554g.png" alt="Zone stats for .xn--ses554g" width="1024">
   </noscript>
 
-  <p><a href="xn--80aswg.png">Static gnuplot image for .xn--80aswg</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p><a href="xn--ses554g.png">Static gnuplot image for .xn--ses554g</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
 
@@ -36,14 +35,14 @@
   <script src="./data.js"></script>
   <script>
 
-  const ctx_xn__80aswg = document.getElementById('xn__80aswg');
-  new Chart(ctx_xn__80aswg, {
+  const ctx_xn__ses554g = document.getElementById('xn__ses554g');
+  new Chart(ctx_xn__ses554g, {
           type: 'line',
           data: {
-            labels: data_xn__80aswg.labels,
+            labels: data_xn__ses554g.labels,
             datasets: [{
-              data: data_xn__80aswg.data,
-              label: '.xn__80aswg',
+              data: data_xn__ses554g.data,
+              label: '.xn--ses554g',
               fill: false,
               borderColor: 'rgb(0, 0, 255)',
               tension: 0.1
