@@ -2186,18 +2186,19 @@ zonesToNames() {
 
 		else
 			size=$(stat -f "%z" ${f})
+			# Run large files in the background.
 			# 52428800 = 50MB; most files are smaller
 			if [ ${size} -gt 52428800 ]; then
 				(
 				zcat ${f} | \
-				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[nN][sS][ 	]/ {print \$1}" | \
+				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
 				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
 					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
 				rm -f ${NAMESDIR}/${tld}.xz.not
 				) &
 			else
 				zcat ${f} | \
-				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[nN][sS][ 	]/ {print \$1}" | \
+				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
 				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
 					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
 				rm -f ${NAMESDIR}/${tld}.xz.not
