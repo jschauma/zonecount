@@ -14,6 +14,7 @@ use warnings;
 
 use DateTime;
 use File::Basename;
+use LWP::UserAgent;
 
 my $BASEDIR = "/misc/dnsdata/zonecount";
 my $COUNTDIR = "${BASEDIR}/counts";
@@ -24,6 +25,24 @@ my $LASTDATE = "";
 my $LASTCOUNT = "";
 
 ###
+
+sub checkHsts($) {
+	my ($tld) = @_;
+	my $url = "https://hstspreload.org/api/v2/status?domain=$tld";
+
+	my $ua = LWP::UserAgent->new();
+	$ua->ssl_opts("SSL_ca_file" => "/etc/openssl/cert.pem");
+	my $response = $ua->get($url);
+	if (!$response->is_success) {
+		print STDERR "Unable to fetch $url: " . $response->status_line . "\n";
+		return undef;
+	}
+
+	if ($response->content =~ m/"status": "(.*?)"/) {
+		return "$1";
+	}
+	return undef;
+}
 
 sub fillData($$$) {
 	my ($wh, $prev, $next) = @_;
@@ -136,6 +155,13 @@ EOF
 ;
 close($wh);
 
+my $hsts = checkHsts($TLD);
+my $hstsMessage = "";
+
+if (($hsts) && ($hsts eq "preloaded")) {
+	$hstsMessage = "<p>Note: this TLD is included in the <a href=\"https://hstspreload.org/?domain=$TLD\">HSTS preload list</a> in many browsers.</p>\n";
+}
+
 open($rh, "<", "${OUTDIR}/tmpl") or die "Unable to open ${OUTDIR}/tmpl: $!";
 open($wh, ">", "${OUTDIR}/index.html") or die "Unable to open ${OUTDIR}/index.html: $!";
 
@@ -146,6 +172,8 @@ while (my $tline = <$rh>) {
 	$tline =~ s/::DATE::/${now}/g;
 	$tline =~ s/::LASTCOUNT::/${LASTCOUNT}/g;
 	$tline =~ s/::LASTDATE::/${LASTDATE}/g;
+
+	$tline =~ s/::HSTS::/${hstsMessage}/g;
 
 	print $wh $tline;
 }
