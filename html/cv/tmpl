@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .cv</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Cape Verde &#127464;&#127483;</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>cv01.dns.pt.</tt>.</p>
   <div>

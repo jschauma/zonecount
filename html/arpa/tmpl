@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .arpa</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>Source: Zone file via <tt>AXFR</tt> from one of <tt>.arpa</tt>'s NS records.</p>
   <div>
     <canvas id="arpa"></canvas>

@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .fr</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for France &#127467;&#127479;</p>
   <p>Source: Published names found <a href="https://www.afnic.fr/produits-services/services-associes/donnees-partagees/">here</a></p>
   <div>

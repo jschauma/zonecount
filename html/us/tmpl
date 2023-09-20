@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .us</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for the United States of America &#127482;&#127480;</p>
   <p>Source: Zone file access.</p>
   <div>

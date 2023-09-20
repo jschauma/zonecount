@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .pl</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Poland &#127477;&#127473;</p>
   <p>Source: Published stats found <a href="https://www.dns.pl/en/statistics/number_of_active_names_in_DNS_zone">here</a></p>
   <div>

@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .at</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Austria &#127462;&#127481;</p>
   <p>Source: Published stats found <a href="https://www.nic.at/en/good_to_know/statistics-and-studies/statistics">here</a></p>
   <div>

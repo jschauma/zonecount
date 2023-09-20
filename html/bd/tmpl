@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .bd</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Bangladesh &#127463;&#127465;; see also <a href="../xn--54b7fta0cc/">.xn--54b7fta0cc</a></p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

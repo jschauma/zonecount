@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .be</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Belgium &#127463;&#127466;</p>
   <p>Source: Published stats found <a href="https://www.dnsbelgium.be/api/statistics">here</a></p>
   <div>

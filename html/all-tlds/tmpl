@@ -9,6 +9,7 @@
   <h1>Zone stats: cumulative # of domains in all TLDs</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <div>
     <canvas id="all_tlds"></canvas>
   </div>

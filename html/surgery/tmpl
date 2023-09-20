@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .surgery</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="surgery"></canvas>

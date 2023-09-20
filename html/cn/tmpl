@@ -33,6 +33,7 @@
   </small>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>

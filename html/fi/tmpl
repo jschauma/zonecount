@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .fi</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Finland &#127467;&#127470;</p>
   <p>Source: Published stats found <a href="https://odata.domain.fi/OpenDomainData.svc/Domains?$inlinecount=allpages">here</a></p>
   <div>

@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .kz</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Kazakhstan &#127472;&#127487;; see also <a href="../xn--80ao21a/">.xn--80ao21a</a></p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

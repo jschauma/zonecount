@@ -9,7 +9,8 @@
   <h1>Zone stats: # of domains in .xn--mk1bu44c</h1>
 
   <hr class="noshade" style="width:100%;">
-  <p>Internationalized domain name 닷컴</p>
+  ::HSTS::
+  <p>Internationalized domain name 닷컴 ("dotcom")</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="xn__mk1bu44c"></canvas>

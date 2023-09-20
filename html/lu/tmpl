@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .lu</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Luxembourg &#127473;&#127482;</p>
   <p>Source: Published stats found <a href="https://dns.lu/fr">here</a></p>
   <div>

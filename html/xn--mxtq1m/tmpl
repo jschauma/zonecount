@@ -6,12 +6,14 @@
   </head>
   <body>
 
-  <h1>Zone stats: # of domains in 政府 ("public affairs")</h1>
+  <h1>Zone stats: # of domains in .xn--mxtq1m</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
+  <p>Interantionalized domain name .政府 ("public affairs")</p>
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
   <div>
-    <canvas id="xn--mxtq1m"></canvas>
+    <canvas id="xn__mxtq1m"></canvas>
   </div>
   <noscript>
     <img src="xn--mxtq1m.png" alt="Zone stats for .xn--mxtq1m" width="1024">

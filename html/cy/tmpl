@@ -9,6 +9,7 @@
   <h1>Zone stats: # of domains in .cy</h1>
 
   <hr class="noshade" style="width:100%;">
+  ::HSTS::
   <p>ccTLD for Cyprus &#127464;&#127486;</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>
