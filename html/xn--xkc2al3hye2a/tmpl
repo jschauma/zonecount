@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Internationalized ccTLD for Sri Lanka (.இலங்கை) &#127473;&#127472;< see also: <a href="../lk/">.lk</a> / <a href="../xn--fzc2c9e2c/">.xn--fzc2c9e2c</a> </p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .cc</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .cc</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Cocos (Keeling) Islands &#127464;&#127464;</p>
+  ::HSTS::
+  ::GUESS::
+  <p>Source: Published stats found <a href="https://www.verisign.cc/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  <div>
+    <canvas id="cc"></canvas>
+  </div>
+  <noscript>
+    <img src="cc.png" alt="Zone stats for .cc" width="1024">
+  </noscript>
+
+  <p><a href="cc.png">Static gnuplot image for .cc</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script>
+
+  const ctx_cc = document.getElementById('cc');
+  new Chart(ctx_cc, {
+          type: 'line',
+          data: {
+            labels: data_cc.labels,
+            datasets: [{
+              data: data_cc.data,
+              label: '.cc',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

@@ -60,7 +60,7 @@ PROGNAME="${0##*/}"
 TDIR=""
 VERBOSITY=0
 
-ALLOWED_TYPES="all cctlds counts git gtlds html icann nsec stats z2n"
+ALLOWED_TYPES="all cctlds counts guess git gtlds html icann nsec stats z2n"
 TYPE=""
 
 BASEDIR="/misc/dnsdata/zonecount"
@@ -203,7 +203,180 @@ SUBDOMAINS_SL="com edu gov net org"
 
 ICANN_STATS="moscow shaw spa voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-NOFILL_DOMAINS="cn ng nz xn--fiqs8s ${ICANN_STATS}"
+GUESSED_DOMAINS="ac
+ad
+af
+ag
+ai
+al
+ao
+aq
+as
+aw
+bb
+bf
+bg
+bh
+bi
+bj
+bm
+bo
+bs
+bw
+by
+bz
+cc
+cf
+cg
+ck
+cm
+co
+cr
+cu
+cx
+dj
+dm
+edu
+eg
+et
+fk
+fm
+ga
+gd
+gf
+gg
+gh
+gi
+gl
+gm
+gq
+gr
+gs
+gu
+gw
+gy
+hm
+hn
+im
+in
+int
+io
+iq
+je
+jm
+kh
+ki
+km
+kn
+kp
+kw
+ky
+la
+lc
+ls
+lv
+ly
+md
+me
+mg
+mh
+mil
+ml
+mm
+mn
+mo
+mq
+mr
+ms
+mt
+mu
+mv
+mz
+na
+nc
+ne
+nf
+np
+nr
+om
+pa
+pf
+pg
+ph
+pk
+pm
+pn
+post
+ps
+pw
+py
+qa
+re
+ro
+rw
+sb
+sc
+sd
+sh
+sm
+sn
+so
+sr
+ss
+st
+sx
+sy
+sz
+tc
+td
+tf
+tg
+tj
+tk
+tl
+tm
+to
+tt
+tv
+ug
+va
+vc
+vg
+vi
+vu
+wf
+ws
+xn--45brj9c
+xn--90ae
+xn--90ais
+xn--clchc0ea0b2g2a9gcd
+xn--d1alf
+xn--fiqz9s
+xn--fpcrj9c3d
+xn--gecrj9c
+xn--h2brj9c
+xn--j1amh
+xn--kprw13d
+xn--mgb9awbf
+xn--mgbaam7a8h
+xn--mgbbh1a71e
+xn--mgbc0a9azcg
+xn--mgbpl2fh
+xn--node
+xn--ogbpf8fl
+xn--qxam
+xn--s9brj9c
+xn--wgbh1c
+xn--wgbl6a
+xn--xkc2dl3a5ee0h
+xn--y9a3aq
+xn--yfro4i67o
+ye
+yt
+zm
+zw"
+
+NOFILL_DOMAINS="cn ng nz xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
 ###
 ### Functions
@@ -267,7 +440,7 @@ axfr() {
 checkTLDs() {
 	verbose "Checking TLDs..."
 
-	zcat ${NAMESDIR}/root.xz | grep -v '^\.' > ${TDIR}/.tlds
+	zcat ${NAMESDIR}/root.xz | grep -v '^\.' | grep -v '^;' > ${TDIR}/.tlds
 	cd ${COUNTDIR}
 	for tld in *; do
 		if [ "${tld}" = "root" ]; then
@@ -928,6 +1101,28 @@ fetchGtlds() {
 	verbose "Fetching gTLDs complete." 2
 }
 
+fetchGuessedStats() {
+	local count d
+	verbose "Fetching best guesstimates for missing domains..."
+
+	curl -s -o ${TDIR}/guessed -H 'User-Agent: Mozilla/5.0'	\
+		"https://research.domaintools.com/statistics/tld-counts/"
+
+	for d in ${GUESSED_DOMAINS}; do
+		verbose "${d}..." 2
+		count=$(grep -A1 "tldpedia/${d}\"" ${TDIR}/guessed |		\
+				sed -n -e 's/.*amount">\([0-9,]*\)<.*/\1/p' |	\
+				tr -d ',')
+		if [ -n "${count}" ]; then
+			echo ${DATE} ${count} >> ${COUNTDIR}/${d}
+			uniq ${COUNTDIR}/${d} > ${COUNTDIR}/.x
+			mv ${COUNTDIR}/.x ${COUNTDIR}/${d}
+			echo "${d}." >> ${TDIR}/.guessed
+		fi
+		count=""
+	done
+}
+
 fetchHkCount() {
 	local count
 
@@ -1410,7 +1605,8 @@ fetchSgCount() {
 	verbose "sg (name count only)..." 2
 
 	count=$(curl -s https://www.sgnic.sg/about-us/registration-statistics | \
-			grep -B2 "</tbody>" |					\
+			grep "<td><span"  |					\
+			tail -1 |						\
 			sed -n -e 's/.*">\([0-9,]*\)<.*/\1/p' |			\
 			tr -d ',')
 
@@ -1847,7 +2043,7 @@ generateHTML() {
 	local v=""
 	local percent=0
 	local grandTotal=0
-	local numExtra numFound numMissing numTLDs numValid
+	local numExtra numFound numGuessed numMissing numTLDs numValid
 	local ignore
 
 	cd ${COUNTDIR}
@@ -1923,6 +2119,11 @@ EOF
       </td>
     </tr>
   </table>
+
+  <table style="border-width:0">
+    <tr>
+      <td style="vertical-align: top">
+        <ul>
 
   <hr style="width: 75%">
   <p>Zone stat line graphs for ${numExtra} now inactive TLDs are available below:</p>
@@ -2089,7 +2290,7 @@ nsecWalkSubdomains() {
 printLinkTable() {
 	local num="${1}"
 	local which="${2}"
-	local count files nofill
+	local count files guessed fill
 
 	if [ x"${which}" = x"valid" ]; then
 		ignore=$(sed -e 's/\.$//' ${TDIR}/.extra | tr '\n' '|' | sed -e 's/|$//')
@@ -2104,16 +2305,23 @@ printLinkTable() {
 
 	count=0
 	for f in ${files}; do
-		nofill=""
+		fill="true"
+		guessed="false"
 		verbose "${f}..." 2
 		sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/.plot | gnuplot 2>/dev/null
 		for nf in ${NOFILL_DOMAINS}; do
 			if [ "${f}" = "${nf}" ]; then
-				nofill="nofill"
+				fill="false"
 				break
 			fi
 		done
-		perl -Tw ${BASEDIR}/tools/htmlify.pl ${f} ${nofill}
+		for g in ${GUESSED_DOMAINS}; do
+			if [ "${f}" = "${g}" ]; then
+				guessed="true"
+				break
+			fi
+		done
+		perl -Tw ${BASEDIR}/tools/htmlify.pl ${f} "${fill}" "${guessed}"
 		printf "        <li><a href=\"${f}/\">${f}</a></li>\n"  >> ${HTMLDIR}/.index-middle
 		count=$(( ${count} + 1 ))
 		if [ ${count} -eq $(( ${num} / 4 + 1 )) ]; then
@@ -2302,6 +2510,10 @@ fi
 
 if matchType "z2n"; then
 	zonesToNames
+fi
+
+if matchType "guess"; then
+	fetchGuessedStats
 fi
 
 if matchType "counts"; then

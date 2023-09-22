@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="movie"></canvas>

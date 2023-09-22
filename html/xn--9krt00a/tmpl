@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Internationalized domain name 微博</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>

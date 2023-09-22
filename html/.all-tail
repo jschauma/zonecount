@@ -78,6 +78,16 @@ new Chart(ctx_bar, {
         },
         options: {
           plugins: {
+            title: {
+              display: true,
+              text: '# of domains by name count',
+              font: {
+                size: 10
+              },
+            },
+            legend: {
+              display: false
+            },
             tooltip: {
               legend: {
                 display: false

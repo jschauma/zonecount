@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .zw</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .zw</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>ccTLD for Zimbabwe &#127487;&#127484;</p>
+  ::HSTS::
+  ::GUESS::
+  <p>Source: Published stats found <a href="https://www.verisign.zw/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  <div>
+    <canvas id="zw"></canvas>
+  </div>
+  <noscript>
+    <img src="zw.png" alt="Zone stats for .zw" width="1024">
+  </noscript>
+
+  <p><a href="zw.png">Static gnuplot image for .zw</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script>
+
+  const ctx_zw = document.getElementById('zw');
+  new Chart(ctx_zw, {
+          type: 'line',
+          data: {
+            labels: data_zw.labels,
+            datasets: [{
+              data: data_zw.data,
+              label: '.zw',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

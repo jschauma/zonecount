@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for Guadeloupe &#127468;&#127477;</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>ns2.nic.gp.</tt>.</p>
   <div>

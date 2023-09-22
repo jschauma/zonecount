@@ -10,10 +10,11 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Internationalized domain name vermögensberatung</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
-    <canvas id="xn__vermgensberatung-pwb"></canvas>
+    <canvas id="xn__vermgensberatung_pwb"></canvas>
   </div>
   <noscript>
     <img src="xn--vermgensberatung-pwb.png" alt="Zone stats for .xn--vermgensberatung-pwb" width="1024">

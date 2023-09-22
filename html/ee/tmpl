@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for Estonia &#127466;&#127466;</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>zone.internet.ee.</tt>.</p>
   <div>

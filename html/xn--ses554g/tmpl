@@ -10,9 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
   <div>
-    <canvas id="xn--ses554g"></canvas>
+    <canvas id="xn__ses554g"></canvas>
   </div>
   <noscript>
     <img src="xn--ses554g.png" alt="Zone stats for .xn--ses554g" width="1024">

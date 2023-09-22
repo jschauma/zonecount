@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="paris"></canvas>
@@ -21,6 +22,12 @@
   <p><a href="paris.png">Static gnuplot image for .paris</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
+
+  <p>Dips:
+    <ul>
+      <li>2023-09-20: removed NSEC records from count</li>
+    </ul>
+  </p>
 
   <hr class="noshade" style="width:100%;">
   <small>

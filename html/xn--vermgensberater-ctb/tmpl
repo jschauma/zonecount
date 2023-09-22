@@ -10,10 +10,11 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Internationalized domain name vermögensberater</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
-    <canvas id="xn__vermgensberater-ctb"></canvas>
+    <canvas id="xn__vermgensberater_ctb"></canvas>
   </div>
   <noscript>
     <img src="xn--vermgensberater-ctb.png" alt="Zone stats for .xn--vermgensberater-ctb" width="1024">

@@ -34,6 +34,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
 
   <script src="../chart.js"></script>
   <script src="./data.js"></script>

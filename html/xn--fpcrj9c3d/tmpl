@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>Zone stats: # of domains in .xn--fpcrj9c3d</title>
+    <meta http-equiv="content-type" content= "text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="/blog/blog.css">
+  </head>
+  <body>
+
+  <h1>Zone stats: # of domains in .xn--fpcrj9c3d</h1>
+
+  <hr class="noshade" style="width:100%;">
+  <p>Internationalized ccTLD for India (.భారత్) &#127470;&#127475;; see also <a href="../in/">.in</a></p>
+  ::HSTS::
+  ::GUESS::
+  <p>Source: Published stats found <a href="https://www.verisign.xn--fpcrj9c3d/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  <div>
+    <canvas id="xn__fpcrj9c3d"></canvas>
+  </div>
+  <noscript>
+    <img src="xn--fpcrj9c3d.png" alt="Zone stats for .xn--fpcrj9c3d" width="1024">
+  </noscript>
+
+  <p><a href="xn--fpcrj9c3d.png">Static gnuplot image for .xn--fpcrj9c3d</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
+  <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
+  <p>Last update: ::DATE::</p>
+
+  <hr class="noshade" style="width:100%;">
+  <small>
+  [<a href="/index.html">homepage</a>]&nbsp;
+  [<a href="/blog/index.html">blog</a>]&nbsp;
+  [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
+  [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
+  </small>
+
+  <hr class="noshade" style="width:100%;">
+
+  <script src="../chart.js"></script>
+  <script src="./data.js"></script>
+  <script>
+
+  const ctx_xn--fpcrj9c3d = document.getElementById('xn--fpcrj9c3d');
+  new Chart(ctx_xn--fpcrj9c3d, {
+          type: 'line',
+          data: {
+            labels: data_xn--fpcrj9c3d.labels,
+            datasets: [{
+              data: data_xn--fpcrj9c3d.data,
+              label: '.xn--fpcrj9c3d',
+              fill: false,
+              borderColor: 'rgb(0, 0, 255)',
+              tension: 0.1
+            }]
+          },
+          options: {
+            spanGaps: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+    });
+  </script>
+  </body>
+</html>

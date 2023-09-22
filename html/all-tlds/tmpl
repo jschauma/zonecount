@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <div>
     <canvas id="all_tlds"></canvas>
   </div>
@@ -27,6 +28,7 @@
       <li>20230809: added <code><a href="../ca/">.ca</a></code> and <code><a href="../nz/">.nz</a></code></li>
       <li>20230810: added <code><a href="../mp/">.mp</a></code>, <code><a href="../mx/">.mx</a></code>, <code><a href="../my/">.my</a></code>, and <code><a href="../pe/">.pe</a></code></li>
       <li>20230811: added <code><a href="../ae/">.ae</a></code></li>
+      <li>20230922: added guesstimates from <a href="https://research.domaintools.com/statistics/tld-counts/">DomainTools</a></li>
     </ul>
   </p>
 

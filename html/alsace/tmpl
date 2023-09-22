@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="alsace"></canvas>
@@ -22,10 +23,15 @@
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
 
+  <p>Dips:
+    <ul>
+      <li>2023-09-20: removed NSEC records from count</li>
+    </ul>
+  </p>
+
   <hr class="noshade" style="width:100%;">
   <small>
   [<a href="/index.html">homepage</a>]&nbsp;
-  [<a href="/blog/index.html">blog</a>]&nbsp;
   [<a href="mailto:jschauma@netmeister.org">jschauma@netmeister.org</a>]&nbsp;
   [<a href="https://mstdn.social/@jschauma/">@jschauma</a>]&nbsp;
   </small>

@@ -10,9 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
   <div>
-    <canvas id="xn--kput3i"></canvas>
+    <canvas id="xn__kput3i"></canvas>
   </div>
   <noscript>
     <img src="xn--kput3i.png" alt="Zone stats for .xn--kput3i" width="1024">

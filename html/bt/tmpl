@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for Bhutan &#127463;&#127481;</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

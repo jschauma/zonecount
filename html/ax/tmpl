@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for &Aring;land &#127462;&#127485;</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

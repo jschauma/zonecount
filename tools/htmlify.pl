@@ -86,12 +86,14 @@ sub fillData($$$) {
 
 my $PROGNAME = basename($0);
 
-if ((scalar(@ARGV) < 1) || (scalar(@ARGV) > 2)) {
-	print STDERR "Usage: $PROGNAME <TLD> [<nofill>]\n";
+if ((scalar(@ARGV) < 1) || (scalar(@ARGV) > 3)) {
+	print STDERR "Usage: $PROGNAME <TLD> [<fill>] [<guessed>]\n";
 	exit(1);
 }
 
 my $TLD = $ARGV[0];
+my $FILL = $ARGV[1];
+my $GUESSED = $ARGV[2];
 
 if ($TLD =~ m/([0-9a-z-]+)/) {
 	$TLD = $1;
@@ -132,7 +134,7 @@ while (my $line = <$rh>) {
 	$n++;
 	chomp($line);
 	if ($line =~ m/^([0-9]+) ([0-9]+)$/) {
-		if (scalar(@ARGV) < 2) {
+		if ($FILL && ($FILL eq "true")) {
 			fillData($wh, $prev, $1);
 		}
 		print $wh "$comma    { x:'$1', y:'$2' }";
@@ -162,6 +164,11 @@ if (($hsts) && ($hsts eq "preloaded")) {
 	$hstsMessage = "<p>Note: this TLD is included in the <a href=\"https://hstspreload.org/?domain=$TLD\">HSTS preload list</a> in many browsers.</p>\n";
 }
 
+my $guessMessage = "";
+if ($GUESSED eq "true") {
+	$guessMessage = "<p>Source: <a href=\"https://research.domaintools.com/statistics/tld-counts/\">DomainTools</a> discovery, which may be quite off.</p>\n";
+}
+
 open($rh, "<", "${OUTDIR}/tmpl") or die "Unable to open ${OUTDIR}/tmpl: $!";
 open($wh, ">", "${OUTDIR}/index.html") or die "Unable to open ${OUTDIR}/index.html: $!";
 
@@ -174,6 +181,11 @@ while (my $tline = <$rh>) {
 	$tline =~ s/::LASTDATE::/${LASTDATE}/g;
 
 	$tline =~ s/::HSTS::/${hstsMessage}/g;
+
+	if ($GUESSED eq "true") {
+		$tline =~ s/^.*<p>Source:.*//;
+	}
+	$tline =~ s/::GUESS::/${guessMessage}/g;
 
 	print $wh $tline;
 }

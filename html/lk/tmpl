@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for Sri Lanka &#127473;&#127472;; see also <a href="../xn--fzc2c9e2c/">.xn--fzc2c9e2c</a> and <a href="../xn--xkc2al3hye2a/">.xn--xkc2al3hye2a</a></p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

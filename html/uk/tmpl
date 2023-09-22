@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for United Kingdom &#127468;&#127463;</p>
   <p>Source: Published stats found <a href="https://www.nominet.uk/news/reports-statistics/">here</a></p>
   <div>
@@ -22,11 +23,6 @@
   <p><a href="uk.png">Static gnuplot image for .uk</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
-  <p>Spikes:
-    <ul>
-      <li>20230808: included third-level domains (<tt>.co.uk</tt>, <tt>.org.uk</tt>, ...)</li>
-    </ul>
-  </p>
 
   <hr class="noshade" style="width:100%;">
   <small>

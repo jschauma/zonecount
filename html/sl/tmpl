@@ -10,6 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>ccTLD for Sierra Leone &#127480;&#127473;</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   <div>

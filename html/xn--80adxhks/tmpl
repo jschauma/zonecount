@@ -10,9 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
+  ::GUESS::
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
   <div>
-    <canvas id="xn--80adxhks"></canvas>
+    <canvas id="xn__80adxhks"></canvas>
   </div>
   <noscript>
     <img src="xn--80adxhks.png" alt="Zone stats for .xn--80adxhks" width="1024">
