@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_london = document.getElementById('london');
-  new Chart(ctx_london, {
-          type: 'line',
-          data: {
-            labels: data_london.labels,
-            datasets: [{
-              data: data_london.data,
-              label: '.london',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

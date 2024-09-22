@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_microsoft = document.getElementById('microsoft');
-  new Chart(ctx_microsoft, {
-          type: 'line',
-          data: {
-            labels: data_microsoft.labels,
-            datasets: [{
-              data: data_microsoft.data,
-              label: '.microsoft',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

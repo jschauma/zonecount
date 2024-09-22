@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_lamborghini = document.getElementById('lamborghini');
-  new Chart(ctx_lamborghini, {
-          type: 'line',
-          data: {
-            labels: data_lamborghini.labels,
-            datasets: [{
-              data: data_lamborghini.data,
-              label: '.lamborghini',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_cancerresearch = document.getElementById('cancerresearch');
-  new Chart(ctx_cancerresearch, {
-          type: 'line',
-          data: {
-            labels: data_cancerresearch.labels,
-            datasets: [{
-              data: data_cancerresearch.data,
-              label: '.cancerresearch',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

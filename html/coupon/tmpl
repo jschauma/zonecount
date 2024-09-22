@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_coupon = document.getElementById('coupon');
-  new Chart(ctx_coupon, {
-          type: 'line',
-          data: {
-            labels: data_coupon.labels,
-            datasets: [{
-              data: data_coupon.data,
-              label: '.coupon',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

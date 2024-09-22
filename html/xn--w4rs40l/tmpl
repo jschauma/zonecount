@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn__w4rs40l = document.getElementById('xn__w4rs40l');
-  new Chart(ctx_xn__w4rs40l, {
-          type: 'line',
-          data: {
-            labels: data_xn__w4rs40l.labels,
-            datasets: [{
-              data: data_xn__w4rs40l.data,
-              label: '.xn__w4rs40l',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

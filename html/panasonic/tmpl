@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_panasonic = document.getElementById('panasonic');
-  new Chart(ctx_panasonic, {
-          type: 'line',
-          data: {
-            labels: data_panasonic.labels,
-            datasets: [{
-              data: data_panasonic.data,
-              label: '.panasonic',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

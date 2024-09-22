@@ -11,7 +11,7 @@
   <hr class="noshade" style="width:100%;">
   ::HSTS::
   ::GUESS::
-  <p>ccTLD for &#127462;&#127482 Australia &#127462;&#127482 Australia</p>
+  <p>ccTLD for Australia &#127462;&#127482</p>
   <p>Source: Published stats found <a href="https://www.auda.org.au">here</a></p>
   <div>
     <canvas id="au"></canvas>
@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_au = document.getElementById('au');
-  new Chart(ctx_au, {
-          type: 'line',
-          data: {
-            labels: data_au.labels,
-            datasets: [{
-              data: data_au.data,
-              label: '.au',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn--clchc0ea0b2g2a9gcd = document.getElementById('xn--clchc0ea0b2g2a9gcd');
-  new Chart(ctx_xn--clchc0ea0b2g2a9gcd, {
-          type: 'line',
-          data: {
-            labels: data_xn--clchc0ea0b2g2a9gcd.labels,
-            datasets: [{
-              data: data_xn--clchc0ea0b2g2a9gcd.data,
-              label: '.xn--clchc0ea0b2g2a9gcd',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

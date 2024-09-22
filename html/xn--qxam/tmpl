@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn--qxam = document.getElementById('xn--qxam');
-  new Chart(ctx_xn--qxam, {
-          type: 'line',
-          data: {
-            labels: data_xn--qxam.labels,
-            datasets: [{
-              data: data_xn--qxam.data,
-              label: '.xn--qxam',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

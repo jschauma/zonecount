@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn__jvr189m = document.getElementById('xn__jvr189m');
-  new Chart(ctx_xn__jvr189m, {
-          type: 'line',
-          data: {
-            labels: data_xn__jvr189m.labels,
-            datasets: [{
-              data: data_xn__jvr189m.data,
-              label: '.xn__jvr189m',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

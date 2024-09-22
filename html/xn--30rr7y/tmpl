@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn__30rr7y = document.getElementById('xn__30rr7y');
-  new Chart(ctx_xn__30rr7y, {
-          type: 'line',
-          data: {
-            labels: data_xn__30rr7y.labels,
-            datasets: [{
-              data: data_xn__30rr7y.data,
-              label: '.xn__30rr7y',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

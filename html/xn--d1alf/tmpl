@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn--d1alf = document.getElementById('xn--d1alf');
-  new Chart(ctx_xn--d1alf, {
-          type: 'line',
-          data: {
-            labels: data_xn--d1alf.labels,
-            datasets: [{
-              data: data_xn--d1alf.data,
-              label: '.xn--d1alf',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

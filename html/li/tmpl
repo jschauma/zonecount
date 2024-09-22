@@ -41,31 +41,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_li = document.getElementById('li');
-  new Chart(ctx_li, {
-          type: 'line',
-          data: {
-            labels: data_li.labels,
-            datasets: [{
-              data: data_li.data,
-              label: '.li',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn--90ais = document.getElementById('xn--90ais');
-  new Chart(ctx_xn--90ais, {
-          type: 'line',
-          data: {
-            labels: data_xn--90ais.labels,
-            datasets: [{
-              data: data_xn--90ais.data,
-              label: '.xn--90ais',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

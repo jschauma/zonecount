@@ -36,31 +36,6 @@
   ::GUESS::
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn__fiqs8s = document.getElementById('xn__fiqs8s');
-  new Chart(ctx_xn__fiqs8s, {
-          type: 'line',
-          data: {
-            labels: data_xn__fiqs8s.labels,
-            datasets: [{
-              data: data_xn__fiqs8s.data,
-              label: '.xn__fiqs8s',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

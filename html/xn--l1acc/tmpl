@@ -35,31 +35,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_xn__l1acc = document.getElementById('xn__l1acc');
-  new Chart(ctx_xn__l1acc, {
-          type: 'line',
-          data: {
-            labels: data_xn__l1acc.labels,
-            datasets: [{
-              data: data_xn__l1acc.data,
-              label: '.xn__l1acc',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

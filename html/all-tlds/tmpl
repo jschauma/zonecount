@@ -29,6 +29,7 @@
       <li>20230810: added <code><a href="../mp/">.mp</a></code>, <code><a href="../mx/">.mx</a></code>, <code><a href="../my/">.my</a></code>, and <code><a href="../pe/">.pe</a></code></li>
       <li>20230811: added <code><a href="../ae/">.ae</a></code></li>
       <li>20230922: added guesstimates from <a href="https://research.domaintools.com/statistics/tld-counts/">DomainTools</a></li>
+      <li>20230929: corrected stats for <code><a href="../fr/">.fr</a></code></li>
     </ul>
   </p>
 
@@ -43,31 +44,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_all_tlds = document.getElementById('all_tlds');
-  new Chart(ctx_all_tlds, {
-          type: 'line',
-          data: {
-            labels: data_all_tlds.labels,
-            datasets: [{
-              data: data_all_tlds.data,
-              label: '.all_tlds',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

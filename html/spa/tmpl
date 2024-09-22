@@ -11,7 +11,7 @@
   <hr class="noshade" style="width:100%;">
   ::HSTS::
   ::GUESS::
-  <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
+  <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
   <div>
     <canvas id="spa"></canvas>
   </div>
@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_spa = document.getElementById('spa');
-  new Chart(ctx_spa, {
-          type: 'line',
-          data: {
-            labels: data_spa.labels,
-            datasets: [{
-              data: data_spa.data,
-              label: '.spa',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

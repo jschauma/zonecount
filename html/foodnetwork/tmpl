@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_foodnetwork = document.getElementById('foodnetwork');
-  new Chart(ctx_foodnetwork, {
-          type: 'line',
-          data: {
-            labels: data_foodnetwork.labels,
-            datasets: [{
-              data: data_foodnetwork.data,
-              label: '.foodnetwork',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

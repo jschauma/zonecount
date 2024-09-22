@@ -40,31 +40,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_bible = document.getElementById('bible');
-  new Chart(ctx_bible, {
-          type: 'line',
-          data: {
-            labels: data_bible.labels,
-            datasets: [{
-              data: data_bible.data,
-              label: '.bible',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>

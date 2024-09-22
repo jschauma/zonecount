@@ -34,31 +34,6 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
-  <script src="./data.js"></script>
-  <script>
-
-  const ctx_extraspace = document.getElementById('extraspace');
-  new Chart(ctx_extraspace, {
-          type: 'line',
-          data: {
-            labels: data_extraspace.labels,
-            datasets: [{
-              data: data_extraspace.data,
-              label: '.extraspace',
-              fill: false,
-              borderColor: 'rgb(0, 0, 255)',
-              tension: 0.1
-            }]
-          },
-          options: {
-            spanGaps: true,
-            plugins: {
-              legend: {
-                display: false
-              }
-            }
-          }
-    });
-  </script>
+  <script src="./::TLD::.js"></script>
   </body>
 </html>
