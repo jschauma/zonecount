@@ -7,7 +7,7 @@
 # stats (see https://www.netmeister.org/blog/tldstats.html).
 #
 # Specifically, it generates the index.html and
-# data.js files for the given TLD.
+# .js files for the given TLD.
 
 use strict;
 use warnings;
@@ -116,9 +116,10 @@ my ($rh, $wh);
 my $now = DateTime->now->strftime("%Y-%m-%d");
 
 open($rh, "<", $TLDFILE) or die "Unable to open $TLDFILE: $!";
-open($wh, ">", "$OUTDIR/data.js") or die "Unable to open $OUTDIR/data.js: $!";
 
 $TLD =~ s/-/_/g;
+
+open($wh, ">", "$OUTDIR/$TLD.js") or die "Unable to open $OUTDIR/$TLD.js: $!";
 
 print $wh <<EOF
 const data_${TLD} = {
@@ -153,6 +154,29 @@ print $wh <<EOF
 
   ]
 }
+
+const ctx_${TLD} = document.getElementById('${TLD}');
+new Chart(ctx_${TLD}, {
+    type: 'line',
+    data: {
+      labels: data_${TLD}.labels,
+      datasets: [{
+        data: data_${TLD}.data,
+        label: '.${TLD}',
+        fill: false,
+        borderColor: 'rgb(0, 0, 255)',
+        tension: 0.1
+      }]
+    },
+    options: {
+      spanGaps: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+});
 EOF
 ;
 close($wh);
@@ -179,6 +203,7 @@ while (my $tline = <$rh>) {
 	$tline =~ s/::DATE::/${now}/g;
 	$tline =~ s/::LASTCOUNT::/${LASTCOUNT}/g;
 	$tline =~ s/::LASTDATE::/${LASTDATE}/g;
+	$tline =~ s/::TLD::/${TLD}/g;
 
 	$tline =~ s/::HSTS::/${hstsMessage}/g;
 
