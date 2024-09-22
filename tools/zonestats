@@ -62,6 +62,7 @@ VERBOSITY=0
 
 ALLOWED_TYPES="all cctlds counts guess git gtlds html icann nsec stats z2n"
 TYPE=""
+TLDS=""
 
 BASEDIR="/misc/dnsdata/zonecount"
 COUNTDIR="${BASEDIR}/counts"
@@ -78,7 +79,7 @@ cd. ns-root-22.scpt-network.net.
 cv. cv01.dns.pt.
 er. zaranew.noc.net.er.
 ee. zone.internet.ee.
-fj. ns1.fj.
+fj. ns2.fj.
 gp. ns2.nic.gp.
 mw. domwe.sdn.mw.
 mp. ns1.nic.mp.
@@ -194,6 +195,7 @@ NSEC_SUBDOMAINS="lb.
 sl."
 
 SUBDOMAINS_ER="com edu gov ind mil net org"
+SUBDOMAINS_FJ="ac biz com gov govt info mil name net org pro school"
 SUBDOMAINS_GP="asso com edu net org"
 SUBDOMAINS_LB="com edu gov net org"
 SUBDOMAINS_MW="ac co com coop edu gov int museum net org"
@@ -204,7 +206,7 @@ ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m x
 
 GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bf bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbh1c xn--wgbl6a xn--xkc2dl3a5ee0h xn--y9a3aq xn--yfro4i67o ye yt zm zw"
 
-NOFILL_DOMAINS="cn ng nz xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
+NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
 ###
 ### Functions
@@ -219,26 +221,32 @@ axfr() {
 	local oldsoa=0
 	local newsoa=0
 	local out=${domain%%.}.xz
+	local m=0
+	local yesterday=0
 
-	verbose "${subdomain:+${subdomain}.}${domain} ..."
+	verbose "${subdomain:+${subdomain}.}${domain} ..." 2
 
 	if excludeForced "${domain%%.}"; then
-		verbose "Excluding ${domain}" 2
+		verbose "Excluding ${domain}" 3
 		return
 	fi
 
-	verbose "${subdomain:+${subdomain}.}${domain} from ${ns}" 2
+	verbose "${subdomain:+${subdomain}.}${domain} from ${ns}" 3
 
 	if [ -z "${subdomain}" ] && [ -f "${ZONESDIR}/${out}" ]; then
 		if [ ${FORCE} -eq 0 ]; then
-			verbose "Already fetched." 3
-			return
+			m=$(stat -f "%m" ${ZONESDIR}/${out})
+			yesterday=$(( $(date +%s) - (24 * 60 * 60) ))
+			if [ $(( ${m} - ${yesterday} )) -lt 0 ]; then
+				verbose "Already fetched." 3
+				return
+			fi
 		fi
 		oldsoa=$(zcat ${ZONESDIR}/${out} | awk '/[ 	][sS][oO][aA][ 	]/ { print $7; exit; }')
 		newsoa=$(dig +noall +answer SOA ${domain} | awk '{print $7;}')
 
 		if [ -n "${oldsoa}" -a -n "${newsoa}" ]; then
-			if [ ${newsoa} -le ${oldsoa} ]; then
+			if [ ${newsoa} -le ${oldsoa} ] && [ ${FORCE} -eq 0 ]; then
 				verbose "No SOA change for ${domain} since ${oldsoa}." 3
 				return
 			fi
@@ -299,6 +307,10 @@ checkCountFiles() {
 
 	cd ${COUNTDIR}
 	for f in *; do
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${f}"; then
+			continue
+		fi
+
 		diff=0
 
 		if [ "${f}" -ot "${TDIR}/start" ]; then
@@ -355,6 +367,33 @@ checkTypeArg() {
 	done
 }
 
+contains() {
+	local haystack="${1}"
+	local needle="${2}"
+
+	if [ -z "${needle}" ]; then
+		return 1
+	fi
+
+	echo "${haystack}" | tr ' ' '\n' | egrep -q "^${needle}$" &&
+		return 0
+
+	return 1
+}
+
+countNames() {
+	local file="${1}"
+	local tld="${2}"
+
+	local subdomains
+
+	zcat ${file} | \
+		awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
+		sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
+		mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
+	rm -f ${NAMESDIR}/${tld}.xz.not
+}
+
 countNamesFiles() {
 	local domain
 	verbose "Counting names from files..."
@@ -362,6 +401,10 @@ countNamesFiles() {
 	cd ${NAMESDIR}
 	for f in *.xz; do
 		domain="${f%%.xz}"
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${domain}"; then
+			continue
+		fi
+
 		verbose "${domain}..." 2
 
 		if excludeForced "${domain}"; then
@@ -370,9 +413,7 @@ countNamesFiles() {
 		fi
 
 		if [ ${FORCE} -eq 0 ]; then
-			m1=$(stat -f "%m" ${f})
-			m2=$(stat -f "%m" ${COUNTDIR}/${domain} 2>/dev/null || echo 0)
-			if [ ${m1} -le ${m2} ]; then
+			if [ "${COUNTDIR}/${domain}" -nt "${f}" ]; then
 				verbose "Count file newer than names file, skipping..." 3
 				continue
 			fi
@@ -381,11 +422,16 @@ countNamesFiles() {
 		echo ${DATE} ${n} >> ${COUNTDIR}/${domain}
 		tr -s ' ' <${COUNTDIR}/${domain} | sort -u > ${TDIR}/f && \
 			mv ${TDIR}/f ${COUNTDIR}/${domain}
+
+		dedupeCountFile "${domain}"
 	done
 }
 
 countTotal() {
 	verbose "Counting total number of domains..."
+	if [ -n "${TLDS}" ]; then
+		return
+	fi
 
 	cd ${COUNTDIR}
 	ignore=$(tr '\n' '|' < ${TDIR}/.extra)
@@ -397,6 +443,28 @@ countTotal() {
 
 cleanup() {
 	rm -fr "${TDIR}"
+}
+
+
+dedupeCountFile() {
+	local f="${1}"
+	verbose "Deduping ${f}..." 3
+
+	<${COUNTDIR}/${f} awk '{
+			this=$2;
+			if (this != last) {
+				last=this;
+			if ((this != prevv) && (length(prevl) > 0)) {
+					print prevl;
+				}
+				print $0;
+			} else {
+				prevl=$0;
+				prevv=$2;
+			}
+		}
+		END { print }' > ${TDIR}/f && \
+			mv ${TDIR}/f ${COUNTDIR}/${f}
 }
 
 excludeForced() {
@@ -572,12 +640,12 @@ fetchCctlds() {
 
 	verbose "Fetching ccTLD zones and select data..."
 
-	(
-	ulimit -t 3600
-	axfr "ch." "zonedata.switch.ch" "${BASEDIR}/misc/ch_zonedata.key"
-	)
-
-	(
+	if [ -z "${TLDS}" ] || contains "${TLDS}" "ch"; then
+		(
+		ulimit -t 3600
+		axfr "ch." "zonedata.switch.ch" "${BASEDIR}/misc/ch_zonedata.key"
+		);
+	fi
 
 	oIFS="${IFS}"
 	IFS="
@@ -585,8 +653,12 @@ fetchCctlds() {
 
 	sub=""
 	for cctld in ${AXFR}; do
+verbose "Checking '${cctld}'"
 		domain=${cctld%% *}
 		ns=${cctld##* }
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${domain%.}"; then
+			continue
+		fi
 		axfr ${domain} ${ns}
 		if [ x"${domain}" != x"." ]; then
 			set +u
@@ -602,12 +674,18 @@ fetchCctlds() {
 	done
 	IFS="${oIFS}"
 
-	axfr "li." "zonedata.switch.ch" "${BASEDIR}/misc/li_zonedata.key"
-	) &
+	if [ -z "${TLDS}" ] || contains "${TLDS}" "li"; then
+		axfr "li." "zonedata.switch.ch" "${BASEDIR}/misc/li_zonedata.key"
+	fi
 
-	fetchFr &
-	fetchSk &
-	fetchUs &
+	if [ -z "${TLDS}" ] || contains "${TLDS}" "fr"; then
+		fetchFr
+	fi
+	if [ -z "${TLDS}" ] || contains "${TLDS}" "sk"; then
+		fetchSk
+	fi
+# disabled 2024-02-15; no more access?
+#	fetchUs
 }
 
 fetchCiCount() {
@@ -656,6 +734,10 @@ fetchClCount() {
 
 fetchComAndNetCount() {
 	local count
+
+	if [ -n "${TLDS}" ] && ! contains "${TLDS}" "com" && ! contains "${TLDS}" "net"; then
+		return
+	fi
 
 	verbose "com and net (name count only)..." 2
 
@@ -910,6 +992,7 @@ fetchGtlds() {
 	verbose "Fetching gTLDs..."
 	local vflag=""
 	local rdir=">/dev/null"
+	local zones=""
 
 	# com and net are large; Verisign has stats on
 	# their site, so let's avoid fetching these
@@ -924,10 +1007,30 @@ fetchGtlds() {
 		exclude=""
 	fi
 
+	if [ -n "${TLDS}" ]; then
+		z=""
+		for t in ${TLDS}; do
+			found=""
+			for d in ${HAVE_STATS} ${NSEC_ZONES} ${ICANN_STATS} \
+				${GUESSED_DOMAINS} \
+				$(echo "${AXFR}" | awk '{print $1}'); do
+				if [ x"${t%.}." = x"${d%.}." ]; then
+					found="yes"
+					break
+				fi
+			done
+			if [ -n "${found}" ]; then
+				z="${z:+${z},}${t}"
+			fi
+		done
+		exclude=""
+		zones="-zone ${z}"
+	fi
+
 	eval czds-dl ${vflag} -redownload -out ${ZONESDIR}	\
 		${exclude}					\
 		-username jschauma@netmeister.org		\
-		-password "\$(cat ${PASSWDFILE})" ${rdir}
+		-password "\$(cat ${PASSWDFILE})" ${rdir} ${zones}
 
 	verbose "Fetching gTLDs complete." 2
 }
@@ -940,6 +1043,10 @@ fetchGuessedStats() {
 		"https://research.domaintools.com/statistics/tld-counts/"
 
 	for d in ${GUESSED_DOMAINS}; do
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${d}"; then
+			continue
+		fi
+
 		verbose "${d}..." 2
 		count=$(grep -A1 "tldpedia/${d}\"" ${TDIR}/guessed |		\
 				sed -n -e 's/.*amount">\([0-9,]*\)<.*/\1/p' |	\
@@ -1015,6 +1122,9 @@ fetchIcannStats() {
 	verbose "Fetching delayed stats from ICANN..."
 
 	for tld in ${ICANN_STATS}; do
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${tld}" ; then
+			continue
+		fi
 		verbose "${tld} (delayed stats)..." 2
 		link=$(curl -s https://www.icann.org/resources/pages/registry-reports/ | \
 			sed -n -e "s|.*\(/resources/pages/${tld}-.*-en\).*|\1|p")
@@ -1416,7 +1526,8 @@ fetchSaCount() {
 	verbose "sa and xn--mgberp4a5d4ar (name count only)..." 2
 
 	curl -o ${TDIR}/sa -s https://nic.sa/api/statistics/
-	count=$(jq -r '.domains_per_year_acc | last | .domains' ${TDIR}/sa)
+	#count=$(jq -r '.domains_per_year_acc | last | .domains' ${TDIR}/sa)
+	count=$(jq -r '.domains_per_year_acc' ${TDIR}/sa)
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/sa
@@ -1666,18 +1777,6 @@ fetchZaCount() {
 	fi
 }
 
-matchType() {
-	local wanted="${1}"
-
-	if expr "${TYPE}" : ".*${wanted}.*" >/dev/null; then
-		return 0
-	fi
-	if expr "${TYPE}" : ".*all.*" >/dev/null; then
-		return 0
-	fi
-	return 1
-}
-
 fetchSk() {
 	verbose "sk (names only)..." 2
 
@@ -1692,6 +1791,8 @@ fetchSk() {
 }
 
 fetchStats() {
+	local tld=""
+	local fn=""
 	verbose "Fetching stats from websites..."
 
 	# some of these may fail, but let's try them all
@@ -1699,82 +1800,26 @@ fetchStats() {
 
 	if [ ${FORCE} -lt 2 ]; then
 		fetchComAndNetCount
-		fetchNuOrSeCount "nu"
-		fetchNuOrSeCount "se"
+		if [ -z "${TLDS}" ] || contains "${TLDS}" "nu"; then
+			fetchNuOrSeCount "nu"
+		fi
+		if [ -z "${TLDS}" ] || contains "${TLDS}" "se"; then
+			fetchNuOrSeCount "se"
+		fi
 	fi
 
-	fetchAeCount
-	fetchAmCount
-	fetchArCount
-	fetchAtCount
-	fetchAuCount
-	fetchAzCount
-	fetchBaCount
-	fetchBeCount
-	fetchBnCount
-	fetchBrCount
-	fetchCaCount
-	fetchCiCount
-	fetchClCount
-	fetchCwCount
-	fetchCzCount
-	fetchDeCount
-	fetchDkCount
-	fetchDoCount
-	fetchDzCount
-	fetchEcCount
-	fetchEuCount
-	fetchEsCount
-	fetchFiCount
-	fetchFoCount
-	fetchGeCount
-	fetchGtCount
-	fetchHkCount
-	fetchHrCount
-	fetchHtCount
-	fetchHuCount
-	fetchIdCount
-	fetchIeCount
-	fetchIlCount
-	fetchIrCount
-	fetchIsCount
-	fetchItCount
-	fetchJoCount
-	fetchJpCount
-	fetchKeCount
-	fetchKrCount
-	fetchLtCount
-	fetchLuCount
-	fetchMaCount
-	fetchMkCount
-	fetchMxCount
-	fetchMyCount
-	fetchNlCount
-	fetchNoCount
-	fetchPeCount
-	fetchPlCount
-	fetchPtCount
-	fetchRsCount
-	fetchRuCount
-	fetchSaCount
-	fetchSgCount
-	fetchSiCount
-	fetchSuCount
-	fetchSvCount
-	fetchThCount
-	fetchTnCount
-	fetchTrCount
-	fetchTwCount
-	fetchTzCount
-	fetchUaCount
-	fetchUkCount
-	fetchUyCount
-	fetchUzCount
-	fetchVnCount
-	fetchZaCount
+	for tld in ${HAVE_STATS}; do
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${tld%.}"; then
+			continue
+		fi
 
+		tld="$(echo ${tld} | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
+		fn="fetch${tld%.}Count"
+		if type ${fn} | grep -q "is a shell function" ; then
+			eval ${fn}
+		fi
+	done
 	set -e
-
 }
 
 fetchSuCount() {
@@ -1925,7 +1970,8 @@ EOF
 
 	cat >>${HTMLDIR}/.index-middle <<EOF
   <p><em>Note</em>: the top ten only accounts for TLDs for which data
-     is available (several large ccTLDs do not provide this information).</p>
+     is available (as shown below, some ccTLDs data is missing, and other data
+     is derived from external sources).</p>
 
   <p>You can find all TLDs for which data is available sorted by number
      of domains <a href="all.html">here</a>.</p>
@@ -1987,7 +2033,7 @@ EOF
 gitCommit() {
 	verbose "Committing files to git..."
 
-	git commit . -m "${DATE}"
+	git commit . -m "${DATE}" >/dev/null 2>&1
 }
 
 identifyMissingZones() {
@@ -2040,30 +2086,77 @@ identifyNSECZones() {
 ldnsWalk() {
 	local domain="${1%.}"
 	local ns="${2:-""}"
+	local rval=0
 
 	verbose "ldns-walk'ing ${domain}${ns:+ from ${ns}}..." 2
 	set +e
-	ldns-walk ${ns} ${domain}. |				\
+	set -o pipefail
+	ldns-walk ${ns} ${domain}. 2>/dev/null |		\
 		egrep -i "^.*\.${domain}.[ 	]" |		\
 		awk '/ NS / { print $1}' |			\
 		xz -q -9  >> ${NAMESDIR}/${domain##*.}.xz
+	rval=$?
+	if [ ${rval} -gt 0 ] && [ ${rval} -ne 10 ]; then
+		echo "ldns-walk'ing ${domain}${ns:+ from ${ns}} failed (rval $?), removing ${NAMESDIR}/${domain##*.}.xz." >&2
+		echo "Command failed was:" >&2
+		echo "ldns-walk ${ns} ${domain}. | egrep -i \"^.*\.${domain}.[      ]\" | xz -q -9" >&2
+		rm "${NAMESDIR}/${domain##*.}.xz"
+	fi
 	set -e
+	set +o pipefail
 }
+
+
+matchType() {
+	local wanted="${1}"
+
+	if expr "${TYPE}" : ".*${wanted}.*" >/dev/null; then
+		return 0
+	fi
+	if expr "${TYPE}" : ".*all.*" >/dev/null; then
+		return 0
+	fi
+	return 1
+}
+
 
 nsecWalk() {
 	local auth authtld sd tld
+	local nsec_zones="${NSEC_ZONES}"
+	local nsec_auth_zones="${NSEC_AUTH_ZONES}"
 
 	verbose "Walking zones using NSEC records..."
 
+	if [ -n "${TLDS}" ]; then
+		nsec_zones=""
+		nsec_auth_zones=""
+		for d in ${TLDS}; do
+			for n in ${NSEC_ZONES}; do
+				if [ x"${d%.}." = x"${n%.}." ]; then
+					nsec_zones="${nsec_zones} ${n}"
+					break
+				fi
+			done
+			for n in ${NSEC_AUTH_ZONES}; do
+				if [ x"${d%.}." = x"${n%.}." ]; then
+					nsec_auth_zones="${nsec_zones} ${n}"
+					break
+				fi
+			done
+		done
+		if [ -z "${nsec_zones}" -a -z "${nsec_auth_zones}" ]; then
+			return
+		fi
+	fi
+
 	if [ ${FORCE} -lt 2 ]; then
 		verbose "Using hard coded list of known NSEC zones..." 2
-		echo "${NSEC_ZONES}" > ${TDIR}/nsec
-		echo "${NSEC_AUTH_ZONES}" > ${TDIR}/nsec-auth
-	else
+		echo "${nsec_zones}" > ${TDIR}/nsec
+		echo "${nsec_auth_zones}" > ${TDIR}/nsec-auth
+	elif [ -z "${TLDS}" ]; then
 		identifyMissingZones
 		identifyNSECZones
 	fi
-
 
 	oIFS="${IFS}"
 	IFS="
@@ -2076,7 +2169,7 @@ nsecWalk() {
  		rm -f ${NAMESDIR}/${tld}xz
  		ldnsWalk "${tld}" "@${auth}"
  	done
- 	) &
+ 	)
 
 	(
 	ulimit -t 3600
@@ -2085,7 +2178,7 @@ nsecWalk() {
  		ldnsWalk "${tld}"
 		for sd in ${NSEC_SUBDOMAINS}; do
 			if [ x"${sd}" = x"${tld}" ]; then
-				nsecWalkSubdomains "${sd}" &
+				nsecWalkSubdomains "${sd}"
 				break
 			fi
 		done
@@ -2105,7 +2198,7 @@ nsecWalkSubdomains() {
 
 	verbose "ldns-walk'ing subomains for ${tld}..." 3
 
-	subdomains="$(eval echo $(echo \${SUBDOMAINS_$(echo ${tld} | tr '[a-z]' '[A-Z]')}))"
+	subdomains="$(eval echo $(echo \${SUBDOMAINS_$(echo ${tld} | tr '[a-z-]' '[A-Z_]')}))"
 	oIFS="${IFS}"
 	IFS=" "
 	for sd in ${subdomains}; do
@@ -2135,7 +2228,6 @@ printLinkTable() {
 		fill="true"
 		guessed="false"
 		verbose "${f}..." 2
-		sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/.plot | gnuplot 2>/dev/null
 		for nf in ${NOFILL_DOMAINS}; do
 			if [ "${f}" = "${nf}" ]; then
 				fill="false"
@@ -2148,7 +2240,10 @@ printLinkTable() {
 				break
 			fi
 		done
-		perl -Tw ${BASEDIR}/tools/htmlify.pl ${f} "${fill}" "${guessed}"
+		if [ -z "${TLDS}" ] || contains "${TLDS}" "${f}"; then
+			sed -e "s/::TLD::/${f}/g" ${HTMLDIR}/.plot | gnuplot 2>/dev/null
+			perl -Tw ${BASEDIR}/tools/htmlify.pl ${f} "${fill}" "${guessed}"
+		fi
 		printf "        <li><a href=\"${f}/\">${f}</a></li>\n"  >> ${HTMLDIR}/.index-middle
 		count=$(( ${count} + 1 ))
 		if [ ${count} -eq $(( ${num} / 4 + 1 )) ]; then
@@ -2162,7 +2257,7 @@ printLinkTable() {
 
 usage() {
 	cat <<EOH
-Usage: ${PROGNAME} [-fhv] [-t type]
+Usage: ${PROGNAME} [-fhv] [-t type] [tld]
 	-f       force updates
 	-h       print this help and exit
 	-t type  which steps to perform (${ALLOWED_TYPES}; default: all)
@@ -2189,6 +2284,8 @@ zonesToNames() {
 	local tld
 	local m1 m2
 	local pattern
+	local subdomains
+	
 	verbose "Extracting names from zone files..."
 
 	cd ${ZONESDIR}
@@ -2199,6 +2296,10 @@ zonesToNames() {
 			break
 		fi
 
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${tld}"; then
+			continue
+		fi
+
 		verbose "${tld}..." 2
 
 		if excludeForced "${tld}"; then
@@ -2207,9 +2308,7 @@ zonesToNames() {
 		fi
 
 		if [ ${FORCE} -eq 0 ]; then
-			m1=$(stat -f "%m" ${f})
-			m2=$(stat -f "%m" ${NAMESDIR}/${tld}.xz 2>/dev/null || echo 0)
-			if [ ${m1} -le ${m2} ]; then
+			if [ "${NAMESDIR}/${tld}.xz" -nt "${f}" ]; then
 				verbose "Names newer than zone, skipping..." 3
 				continue
 			fi
@@ -2220,24 +2319,16 @@ zonesToNames() {
 				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz
 
 		else
-			size=$(stat -f "%z" ${f})
-			# Run large files in the background.
-			# 52428800 = 50MB; most files are smaller
-			if [ ${size} -gt 52428800 ]; then
-				(
-				zcat ${f} | \
-				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
-				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
-					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
-				rm -f ${NAMESDIR}/${tld}.xz.not
-				) &
-			else
-				zcat ${f} | \
-				awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
-				sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
-					mv ${NAMESDIR}/${tld}.xz.not ${NAMESDIR}/${tld}.xz;
-				rm -f ${NAMESDIR}/${tld}.xz.not
-			fi
+			countNames "${f}" "${tld}"
+
+			set +u
+			subdomains="$(eval echo $(echo \${SUBDOMAINS_$(echo ${tld} | tr '[a-z-]' '[A-Z_]')}))"
+			for d in ${subdomains}; do
+				countNames "${f}" "${d}.${tld}"
+				cat ${NAMESDIR}/${d}.${tld}.xz >> ${NAMESDIR}/${tld}.xz
+				rm ${NAMESDIR}/${d}.${tld}.xz
+			done
+			set -u
 		fi
 	done
 
@@ -2272,6 +2363,7 @@ while getopts 'fht:v' opt; do
 	esac
 done
 shift $(($OPTIND - 1))
+TLDS="$@"
 
 if [ -z "${TYPE}" ]; then
 	TYPE="all"
@@ -2299,20 +2391,17 @@ if [ ${FORCE} -lt 2 ]; then
 	# fetchCctlds first, but nsecWalk takes a long
 	# time, so let's kick it off early if we can.
 	if matchType "nsec"; then
-		nsecWalk &
+		nsecWalk
 	fi
 fi
 
 if matchType "gtlds"; then
-	fetchGtlds &
+	fetchGtlds
 fi
 
 if matchType "cctlds"; then
 	fetchCctlds
 fi
-
-verbose "Waiting for background jobs..."
-wait
 
 if [ -f "${ZONESDIR}/.xz" ]; then
 	mv "${ZONESDIR}/.xz" "${ZONESDIR}/root.xz"
