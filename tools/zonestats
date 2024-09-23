@@ -87,7 +87,7 @@ nu. zonedata.iis.se.
 ni. ns.ideay.net.ni.
 se. zonedata.iis.se.
 xn--54b7fta0cc. bayanno.btcl.net.bd.
-xn--ygbi2ammx. ns1.gov.ps."
+xn--ygbi2ammx. bilal.pnina.ps."
 
 FORCED_ZONES="com net nu se"
 
@@ -204,7 +204,7 @@ SUBDOMAINS_SL="com edu gov net org"
 
 ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bf bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbh1c xn--wgbl6a xn--xkc2dl3a5ee0h xn--y9a3aq xn--yfro4i67o ye yt zm zw"
+GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bf bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbh1c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
 
 NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
@@ -237,7 +237,7 @@ axfr() {
 		if [ ${FORCE} -eq 0 ]; then
 			m=$(stat -f "%m" ${ZONESDIR}/${out})
 			yesterday=$(( $(date +%s) - (24 * 60 * 60) ))
-			if [ $(( ${m} - ${yesterday} )) -lt 0 ]; then
+			if [ $(( ${m} - ${yesterday} )) -gt 0 ]; then
 				verbose "Already fetched." 3
 				return
 			fi
@@ -256,12 +256,14 @@ axfr() {
 	dig ${keyfile:+-k} ${keyfile} +noall +answer @${ns} ${subdomain:+${subdomain}.}${domain} AXFR 2>/dev/null | \
 		xz -q -9 > ${ZONESDIR}/${out}.not
 	if [ $? -eq 0 ]; then
-		# Ensure first and last SOA are identical; else transfer failed.
-		# 'grep SOA' only in one to force difference if the entire output
-		#  is ';transfer failed'
-		zcat ${ZONESDIR}/${out}.not | grep SOA | head -1 > ${TDIR}/1
-		zcat ${ZONESDIR}/${out}.not | tail -1 > ${TDIR}/2
-		if [ -s ${TDIR}/1 ] && diff ${TDIR}/[12] >/dev/null 2>&1; then
+		# First and last SOA _should_ be identical, but sometimes a xfer
+		# yields a different SOA.  We pretend that's ok (although differing
+		# SOA records imply ambiguity), and carry on.
+		# If transfer failed, the last record would not be a SOA, so that's
+		# all we care about here.
+		zcat ${ZONESDIR}/${out}.not | head -1 | grep SOA > ${TDIR}/1
+		zcat ${ZONESDIR}/${out}.not | tail -1 | grep SOA > ${TDIR}/2
+		if [ -s ${TDIR}/1 ] && [ -s ${TDIR}/2 ]; then
 			if [ -n "${subdomain}" ]; then
 				cat ${ZONESDIR}/${out}.not >> ${ZONESDIR}/${out}
 			else
@@ -500,15 +502,20 @@ fetchAeCount() {
 
 
 fetchAmCount() {
-	local count
+	local counts
 
 	verbose "am (name count only)..." 2
 
-	count=$(curl -s https://amnic.net/statistics/ | \
-			sed -n -e 's/.*Total[^0-9]*>\([0-9]*\)<.*/\1/p')
+	counts=$(curl -s https://www.amnic.net/| 	\
+			grep records |			\
+			tr '-' '\n' |			\
+			grep "</u>" |			\
+			sed -e 's/ \([0-9]*\)<.*/\1/'|	\
+			tr '\n' ' ')
 
-	if [ -n "${count}" ]; then
-		echo ${DATE} ${count} >> ${COUNTDIR}/am
+	if [ -n "${counts}" ]; then
+		echo ${DATE} ${counts%% *} >> ${COUNTDIR}/am
+		echo ${DATE} ${counts#* } >> ${COUNTDIR}/xn--y9a3aq
 	fi
 }
 
@@ -1019,18 +1026,18 @@ fetchGtlds() {
 					break
 				fi
 			done
-			if [ -n "${found}" ]; then
+			if [ -z "${found}" ]; then
 				z="${z:+${z},}${t}"
 			fi
 		done
 		exclude=""
-		zones="-zone ${z}"
+		zones="-zone ${z:-${t}}"
 	fi
 
 	eval czds-dl ${vflag} -redownload -out ${ZONESDIR}	\
 		${exclude}					\
 		-username jschauma@netmeister.org		\
-		-password "\$(cat ${PASSWDFILE})" ${rdir} ${zones}
+		-password "\$(cat ${PASSWDFILE})" ${zones} ${rdir}
 
 	verbose "Fetching gTLDs complete." 2
 }
