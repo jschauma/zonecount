@@ -99,6 +99,7 @@ au.
 az.
 ba.
 be.
+bf.
 bn.
 br.
 ca.
@@ -204,7 +205,7 @@ SUBDOMAINS_SL="com edu gov net org"
 
 ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bf bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbh1c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
+GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbh1c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
 
 NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
@@ -261,8 +262,10 @@ axfr() {
 		# SOA records imply ambiguity), and carry on.
 		# If transfer failed, the last record would not be a SOA, so that's
 		# all we care about here.
+		set +e
 		zcat ${ZONESDIR}/${out}.not | head -1 | grep SOA > ${TDIR}/1
 		zcat ${ZONESDIR}/${out}.not | tail -1 | grep SOA > ${TDIR}/2
+		set -e
 		if [ -s ${TDIR}/1 ] && [ -s ${TDIR}/2 ]; then
 			if [ -n "${subdomain}" ]; then
 				cat ${ZONESDIR}/${out}.not >> ${ZONESDIR}/${out}
@@ -597,6 +600,21 @@ fetchBeCount() {
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/be
+	fi
+}
+
+fetchBfCount() {
+	local count
+
+	verbose "bf (name count only)..." 2
+
+	# Expired cert as of 2024-09-24
+	count=$(curl -k -s https://www.registre.bf/index.php/statistiques/ |	\
+			grep -B1 "Nom de Domaine" |				\
+			sed -n -e 's/.*data-num="\([0-9]*\)".*/\1/p')
+
+	if [ -n "${count}" ]; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/bf
 	fi
 }
 
