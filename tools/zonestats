@@ -652,6 +652,7 @@ fetchCaCount() {
 
 	verbose "ca (name count only)..." 2
 
+	# Cloudflare blocked?
 	count="$(curl -s -H 'User-Agent: Mozilla/5.0' https://www.cira.ca/en/ | \
 		sed -n -e 's/.*c-site-footer_counter_label.*bottom">\([0-9,]*\)<.*/\1/p' | \
 		tr -d ',')"
@@ -853,16 +854,13 @@ fetchDzCount() {
 
 	verbose "dz and xn--lgbbat1ad8j (name count only)..." 2
 
-	count="$(curl -s http://www.nic.dz/en/ | \
-			sed -n -e "s|.*<tbody><tr><td><strong>Total</strong></td><td style='text-align:right;'><strong>\([0-9]*\)<.*|\1|p")"
+	count="$(curl -k -s https://api.nic.dz/v1/domains/count)"
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/dz
 	fi
 
-	count="$(curl -s http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/ | \
-			sed -n -e '/<table.*strong>[0-9]*</ { s/.*strong>\([0-9]*\)<.*/\1/p; q;}')"
-
+	count="$(curl -k -s https://api.nic.dz/v1/arabic/domains/count)"
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--lgbbat1ad8j
 	fi
@@ -915,9 +913,8 @@ fetchEsCount() {
 
 	verbose "es (name count only)..." 2
 
-	count="$(curl -s https://www.dominios.es/es |		\
-			grep -m 1 -A 2 ">Ya somos<" |		\
-			sed -n -e 's/.*>\([0-9.]*\)<.*/\1/p' |	\
+	count="$(curl -s https://www.dominios.es/es |				\
+			sed -n -e 's/.*Ya somos.*>\([0-9.]*\)<\/p>.*/\1/p' |	\
 			tr -d '.')"
 
 	if [ -n "${count}" ]; then
@@ -945,11 +942,9 @@ fetchFoCount() {
 
 	verbose "fo (name count only)..." 2
 
-	count=$(curl -s https://xn--kisnavn-p1a.fo/ |		\
-			grep -m 1 -A 1 ">www .fo<"  |		\
-			tail -1 |				\
-			sed -e 's/.*>\([0-9,]*\)<.*/\1/' |	\
-			tr -d ',')
+	count=$(curl -s https://www.xn--kisnavn-p1a.fo/ |		\
+		sed -n -e 's/.*> \([0-9.]*\)<.*> .fo-heimas.*/\1/p' |	\
+			tr -d '.')
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/fo
