@@ -530,7 +530,7 @@ fetchArCount() {
 	verbose "ar (name count only)..." 2
 
 	count=$(curl -s https://nic.ar/es/dominios/estadisticas |	\
-			grep -m 1 -A 16 "<tbody" | tail -1 |		\
+			grep -m 1 -A 17 "<tbody" | tail -1 |		\
 			sed -e 's/.*>\(.*\)<.*/\1/' | tr -d '.')
 
 	if [ -n "${count}" ]; then
