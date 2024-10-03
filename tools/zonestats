@@ -1669,25 +1669,23 @@ fetchTwCount() {
 
 	verbose "tw and xn--kpry57d (name count only)..." 2
 
-	curl -f -s https://www.twnic.tw/dnjson.txt |			\
-		sed -e 's/, /,@/g' |					\
-                tr '@' '\n' > ${TDIR}/tw
+	curl -f -s https://www.twnic.tw/dnjson.json > ${TDIR}/tw
 
 	idncount=0
-	idncount=$(<${TDIR}/tw awk -F '[' '/台灣/ { p=1 }; /]]/ {
-				if (p == 1) {
-					sum += gensub("]].*", "", "g", $NF);
-					p=0;
-				}}
-				END { print sum }');
+	idncount=$(<${TDIR}/tw jq -r '.[] |
+				select(."網域名稱" | endswith(".台灣")) |
+				"\(."網域名稱") \(."數量")" ' | \
+			awk '{ f[$1] = $2} END { for (d in f) { sum += f[d]; } print sum; }')
 
 	if [ -n "${idncount}" ]; then
 		echo ${DATE} ${idncount} >> ${COUNTDIR}/xn--kpry57d
 	fi
 
-	twcount=$(<${TDIR}/tw grep ']]' |				\
-			sed -e 's/.*\[\([0-9]*\).*/\1/' |		\
-			awk -v I=${idncount} '{sum += $1;} END { print sum - I }')
+	twcount=0
+	twcount=$(<${TDIR}/tw jq -r '.[] |
+				select(."網域名稱" | endswith(".tw")) |
+				"\(."網域名稱") \(."數量")" ' | \
+			awk '{ f[$1] = $2} END { for (d in f) { sum += f[d]; } print sum; }')
 
 	if [ -n "${twcount}" ] && [ ${twcount} -gt 0 ]; then
 		echo ${DATE} ${twcount} >> ${COUNTDIR}/tw
