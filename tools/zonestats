@@ -1419,15 +1419,13 @@ fetchMxCount() {
 }
 
 fetchMyCount() {
-	local count
+	local count y
 
 	verbose "my (name count only)..." 2
 
-	count=$(curl -s https://mynic.my/media/statistics/ |		\
-			grep -B1 '</tr>' |				\
-			grep -m 1 '<td class="tableexport-string">' |	\
-			sed -e 's/.*>\(.*\)<.*/\1/' |			\
-			tr -d ',')
+	y=$(date +&)
+	count=$(curl -s "https://mynic.my/ajax/statistics?type=active&year=${y}" | \
+			jq -r '.tableData.total | [.[]] | .[0]')
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/my
