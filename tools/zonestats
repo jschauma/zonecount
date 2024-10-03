@@ -459,10 +459,12 @@ dedupeCountFile() {
 			this=$2;
 			if (this != last) {
 				last=this;
-			if ((this != prevv) && (length(prevl) > 0)) {
+				if ((this != prevv) && (length(prevl) > 0)) {
 					print prevl;
 				}
 				print $0;
+				prevl = "";
+				prevv = "";
 			} else {
 				prevl=$0;
 				prevv=$2;
@@ -1087,12 +1089,26 @@ fetchGuessedStats() {
 }
 
 fetchHkCount() {
-	local count
+	local count y
 
 	verbose "hk and xn--j6w193g (name count only)..." 2
 
-	count=$(curl -s -X POST -d "method=statistics1&lang=2" "https://www.hkirc.hk/api.php" | \
-		jq -r '.data | last | "\(.["HK"]) \(.["香港"])"' )
+	y=$(date +%Y)
+	count=$(curl -s -X POST					\
+		-d "endpoint=https%3A%2F%2Fservice.hkirc.hk%2Fapi%2Fstatistic%2Fdn&action=load_addtocart_button&year=${y}&lang=en"		\
+		https://www.hkirc.hk/wp-admin/admin-ajax.php |	\
+		perl -pe '
+if (/.*?tr><tr><td>(.*?)<\\\/tr>.*/) {
+        my $data = $1;
+        my @fields = split(/<\\\/td><td>/, $data);
+        my $mon = shift(@fields);
+        # .hk, .xn--j6w193g, .com.hk, .net.hk, .org.hk, .edu.hk, .gov.hk, .idv.hk, 6 <>.xn--j6w193g, total
+        my @fields = map { s/,//; $_ } @fields;
+        my $hk = $fields[0] + $fields[2] + $fields[3] + $fields[4] + $fields[5] + $fields[6] + $fields[7];
+        my $xn = $fields[1] + $fields[8] + $fields[9] + $fields[10] + $fields[11] + $fields[12] + $fields[13];
+        print "$hk $xn\n";
+	exit;
+}')
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count% *} >> ${COUNTDIR}/hk
