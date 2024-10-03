@@ -1298,12 +1298,12 @@ fetchJoCount() {
 	# missing intermediate cert
 	curl -k -s https://dns.jo/DomStat.aspx | sed -e 's|<TR||g' | tr '' '\n' > ${TDIR}/f
 
-	xncount=$(<${TDIR}/f grep -B1 "<B>Total</B>" | head -1 | sed -e 's/.*>\([0-9]*\)<\/TD><.*/\1/')
+	xncount=$(<${TDIR}/f sed -n -e 's/.*>\([0-9]*\)<\/TD><TD.*/\1/p' | grep . | tail -1)
 	if [ -n "${xncount}" ]; then
 		echo ${DATE} ${xncount} >> ${COUNTDIR}/xn--mgbayh7gpa
 	fi
 
-	count=$(<${TDIR}/f sed -n -e 's|.*>Total.*<B>\([0-9]*\)</B></font></TD><TD.*|\1|p')
+	count=$(<${TDIR}/f sed -n -e 's/.*<B>\([0-9]*\)<\/B>.*<TD.*/\1/p')
 
 	if [ -n "${count}" ]; then
 		if [ -n "${xncount}" ]; then
@@ -2389,7 +2389,7 @@ while getopts 'fht:v' opt; do
 			# NOTREACHED
 		;;
 		t)
-			TYPE="${OPTARG} ${TYPE:-""}"
+			TYPE="$(echo ${OPTARG} | sed -e 's/,/ /g') ${TYPE:-""}"
 		;;
 		v)
 			VERBOSITY=$(( ${VERBOSITY} + 1 ))
