@@ -54,6 +54,7 @@ umask 077
 export XZ_DEFAULTS="--memlimit=225MiB"
 
 DATE=$(date +%Y%m%d)
+DATE_Y=$(date +%Y)
 FORCE=0
 PASSWDFILE="/home/jschauma/.icann"
 PROGNAME="${0##*/}"
@@ -871,7 +872,7 @@ fetchEcCount() {
 
 	verbose "ec (name count only)..." 2
 
-	count="$(curl -s https://www.nic.ec/ | \
+	count="$(curl -s https://www.nic.ec/preguntas-frecuentes.php | \
 			sed -n -e '/animateValue(obj, 0/ { s/.*, \([0-9]*\),.*/\1/p; q; }')"
 
 	if [ -n "${count}" ]; then
@@ -952,7 +953,7 @@ fetchFoCount() {
 }
 
 fetchFr() {
-	local y=$(date +%Y)
+	local y=${DATE_Y}
 	local m=$(date +%m | sed -e 's/^0//')
 
 	verbose "fr (names only)..." 2
@@ -1088,9 +1089,8 @@ fetchHkCount() {
 
 	verbose "hk and xn--j6w193g (name count only)..." 2
 
-	y=$(date +%Y)
 	count=$(curl -s -X POST					\
-		-d "endpoint=https%3A%2F%2Fservice.hkirc.hk%2Fapi%2Fstatistic%2Fdn&action=load_addtocart_button&year=${y}&lang=en"		\
+		-d "endpoint=https%3A%2F%2Fservice.hkirc.hk%2Fapi%2Fstatistic%2Fdn&action=load_addtocart_button&year=${DATE_Y}&lang=en"		\
 		https://www.hkirc.hk/wp-admin/admin-ajax.php |	\
 		perl -pe '
 if (/.*?tr><tr><td>(.*?)<\\\/tr>.*/) {
@@ -1219,8 +1219,9 @@ fetchIlCount() {
 
 	verbose "il and xn--4dbrk0ce (name count only)..." 2
 
-	curl -o ${TDIR}/il -s https://en.isoc.org.il/il-cctld/number-of-registered-domain-names-2023
-	count=$(grep -m 1 -A1 "domainitem" ${TDIR}/il |				\
+	# CLoudflare blocked?
+	curl -o ${TDIR}/il -s https://en.isoc.org.il/domain-names-registry-statistics
+	count=$(<${TDIR}/il grep -m 1 -A1 "domainitem" |			\
 		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
 		tr -d ',')
 
@@ -1228,7 +1229,7 @@ fetchIlCount() {
 		echo ${DATE} ${count} >> ${COUNTDIR}/il
 	fi
 
-	count=$(grep -A1 "domainitem" ${TDIR}/il |				\
+	count=$(<${TDIR}/il grep -A1 "domainitem" |				\
 		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
 		tr -d ',')
 
@@ -1328,7 +1329,7 @@ fetchKeCount() {
 	verbose "ke (name count only)..." 2
 
 	count=$(curl -s https://kenic.or.ke/ |			\
-		sed -n -e '/counter-value/{s/.*<span class="counter-value" data-count="\([0-9]*\)".*/\1/p; q;}')
+		sed -n -e '/counter-nmber/ {s/.*data-to="\([0-9]*\)".*/\1/p; q;}')
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ke
 	fi
@@ -1395,6 +1396,7 @@ fetchMkCount() {
 
 	verbose "mk (name count only)..." 2
 
+	# 2024-10-03: No more stats?
 	count=$(curl -s https://marnet.mk/en/ |
 			sed -n -e 's/.*data-counter-value="\([0-9]*\)".*/\1/p')
 
@@ -1408,10 +1410,11 @@ fetchMxCount() {
 
 	verbose "mx (name count only)..." 2
 
-	count=$(curl -s https://www.dominios.mx/instant-statistics-2/ | \
-			grep "<h3>Total:" | \
-			sed -n -e 's/<h3>Total: \([0-9,]*\)<.*/\1/p' | \
-			tr -d ',')
+	count=$(curl -s https://www.dominios.mx/wp-json/visualizer/v1/action/8350/csv/ | \
+		jq -r '.data.csv' |	\
+		head -3 |		\
+		tail -1 | 		\
+		awk -F, '{ print $NF }')
 
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/mx
@@ -1423,8 +1426,7 @@ fetchMyCount() {
 
 	verbose "my (name count only)..." 2
 
-	y=$(date +&)
-	count=$(curl -s "https://mynic.my/ajax/statistics?type=active&year=${y}" | \
+	count=$(curl -s "https://mynic.my/ajax/statistics?type=active&year=${DATE_Y}" | \
 			jq -r '.tableData.total | [.[]] | .[0]')
 
 	if [ -n "${count}" ]; then
@@ -1649,7 +1651,7 @@ fetchTrCount() {
 
 	count=$(curl -s --http1.1 https://www.trabis.gov.tr/ozet |	\
 			grep -m 1 -A 1 '<div class="circle">' |		\
-			sed -n -e 's/.*<p>\([0-9.]*\)<.*/\1/p' |	\
+			sed -n -e 's/.*<p.*>\([0-9.]*\)<.*/\1/p' |	\
 			tr -d '.')
 
 	if [ -n "${count}" ]; then
@@ -1720,7 +1722,7 @@ fetchUkCount() {
 
 	verbose "uk (name count only)..." 2
 
-	count=$(curl -s "https://www.nominet.uk/news/reports-statistics/uk-register-statistics-$(date +%Y)/" | \
+	count=$(curl -s "https://www.nominet.uk/news/reports-statistics/uk-register-statistics-${DATE_Y}/" | \
 			grep total-domains-under-management-at-end-of-month |	\
 			perl -pe 's/<\/section>/\n/' | \
 			head -1 | \
