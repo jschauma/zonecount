@@ -12,7 +12,7 @@
   ::HSTS::
   ::GUESS::
   <p>ccTLD for Ecuador &#127466;&#127464;</p>
-  <p>Source: Published stats found <a href="http://www.nic.dz/en/">here</a></p>
+  <p>Source: Published stats found <a href="https://www.nic.ec/preguntas-frecuentes.php">here</a></p>
   <div>
     <canvas id="ec"></canvas>
   </div>

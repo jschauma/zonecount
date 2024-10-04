@@ -23,6 +23,7 @@
   <p><a href="hk.png">Static gnuplot image for .hk</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
+  <p>Spikes: 20241003: added 3rd-level domain counts</p>
 
   <hr class="noshade" style="width:100%;">
   <small>
