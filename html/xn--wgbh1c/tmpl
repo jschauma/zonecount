@@ -12,7 +12,7 @@
   <p>Internationalized ccTLD for Egypt (.مصر	) &#127466;&#127468;; see also <a href="../eg/">.eg</a></p>
   ::HSTS::
   ::GUESS::
-  <p>Source: Published stats found <a href="https://www.verisign.xn--wgbh1c/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  <p>Source: Zone file via AXFR from <code>ns1.dotmasr.eg.</code></p>
   <div>
     <canvas id="xn__wgbh1c"></canvas>
   </div>
