@@ -24,7 +24,31 @@ my %DATA;
 my $LASTDATE = "";
 my $LASTCOUNT = "";
 
+$ENV{"PATH"} = "/bin:/usr/bin";
+$ENV{"CDPATH"} = "";
+$ENV{"ENV"} = "";
+
 ###
+sub checkDNSSEC($) {
+	my ($tld) = @_;
+	my $pipe;
+
+	if ($tld =~ m/^([0-9a-z.]+)$/) {
+		$tld = $1;
+	} else {
+		return undef, undef;
+	}
+
+	open($pipe, "-|", "dig +noall +authority +dnssec _.$tld") or die "Unable to open pipe from dig(1): $!";
+	while (my $line = <$pipe>) {
+		if ($line =~ m/\sIN\s+RRSIG\s+(NSEC3?)\s+/) {
+			return 1, $1;
+		}
+	}
+	close($pipe);
+
+	return undef, undef;
+}
 
 sub checkHsts($) {
 	my ($tld) = @_;
@@ -80,6 +104,48 @@ sub fillData($$$) {
 		print $wh ",\n    { x:'$missing', y:null }";
 		$diff--;
 	}
+}
+
+sub getWhois($) {
+	my ($tld) = @_;
+	my $pipe;
+
+	if ($tld =~ m/^([0-9a-z.]+)$/) {
+		$tld = $1;
+	} else {
+		return undef, undef, undef, undef;
+	}
+
+	my @orgs;
+	my ($created, $url);
+
+	open($pipe, "-|", "whois -h whois.iana.org $tld") or die "Unable to open pipe from whois(1): $!";
+	while (my $line = <$pipe>) {
+		chomp($line);
+		if ($line =~ m/^organisation:\s*(.*)/) {
+			push(@orgs, $1);
+		}
+		if ($line =~ m/^remarks:.*(http.*)/) {
+			$url = $1;
+		}
+		if ($line =~ m/^created:\s*(.*)/) {
+			$created = $1;
+			last;
+		}
+	}
+	close($pipe);
+
+	my $tech = "";
+	my $delegated = $orgs[0];
+
+	if (scalar(@orgs) > 1) {
+		$tech = $orgs[2];
+		if ($tech eq $delegated) {
+			$tech = "";
+		}
+	}
+
+	return $delegated, $tech, $url, $created;
 }
 
 ###
@@ -188,9 +254,33 @@ if (($hsts) && ($hsts eq "preloaded")) {
 	$hstsMessage = "<p>Note: this TLD is included in the <a href=\"https://hstspreload.org/?domain=$TLD\">HSTS preload list</a> in many browsers.</p>\n";
 }
 
+my ($dnssec, $nsec) = checkDNSSEC($TLD);
+my $dnssecMessage = "no";
+if ($dnssec) {
+	$dnssecMessage = "yes ($nsec)";
+}
+
 my $guessMessage = "";
 if ($GUESSED eq "true") {
 	$guessMessage = "<p>Source: <a href=\"https://research.domaintools.com/statistics/tld-counts/\">DomainTools</a> discovery, which may be quite off.</p>\n";
+}
+
+my ($whoisDelegated, $whoisTechnical, $registryUrl, $created) = getWhois($TLD);
+my $whoisMessage = "";
+if ($whoisDelegated) {
+	$whoisMessage = "<p>Delegated to: $whoisDelegated";
+}
+if ($whoisTechnical) {
+	$whoisMessage .= "<br>\nRegistry: $whoisTechnical";
+}
+if ($registryUrl) {
+	$whoisMessage .= "<br>\nLink: <a href=\"$registryUrl\">$registryUrl</a>";
+}
+if ($created) {
+	$whoisMessage .= "<br>\nCreated: $created";
+}
+if ($whoisMessage) {
+	$whoisMessage .= "</p>";
 }
 
 open($rh, "<", "${OUTDIR}/tmpl") or die "Unable to open ${OUTDIR}/tmpl: $!";
@@ -206,6 +296,8 @@ while (my $tline = <$rh>) {
 	$tline =~ s/::TLD::/${TLD}/g;
 
 	$tline =~ s/::HSTS::/${hstsMessage}/g;
+	$tline =~ s/::DNSSEC::/${dnssecMessage}/g;
+	$tline =~ s/::WHOIS::/${whoisMessage}/g;
 
 	if ($GUESSED eq "true") {
 		$tline =~ s/^.*<p>Source:.*//;
