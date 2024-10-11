@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--mgba3a4f16a</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized ccTLD for Iran (.ایران) &#127470;&#127479;; see also: <a href="../ir/">.ir</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.nic.ir/Statistics">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__mgba3a4f16a"></canvas>
   </div>

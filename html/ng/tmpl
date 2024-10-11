@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .ng</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Nigeria &#127475;&#127468;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Manually pulled out of <a href="https://nira.org.ng/agm-reports/">NiRA Reports</a></p>
+  ::GUESS::
   <div>
     <canvas id="ng"></canvas>
   </div>

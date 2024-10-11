@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .lt</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Lithuania &#127473;&#127481;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.domreg.lt/export/currcounts.json">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="lt"></canvas>
   </div>

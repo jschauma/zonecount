@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--54b7fta0cc</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized ccTLD for Bangladesh (.বাংলা) &#127463;&#127465; see also: <a href="../bd/">.bd</a>;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>bayanno.btcl.net.bd.</tt>.</p>
+  ::GUESS::
   <div>
     <canvas id="xn__54b7fta0cc"></canvas>
   </div>

@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Syria &#127480;&#127486; (see also <a href="../xn--ogbpf8fl/">.xn--ogbpf8fl</a>)</p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.sy/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="sy"></canvas>
   </div>

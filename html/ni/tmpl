@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .ni</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Nicaragua &#127475;&#127470;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>ns.ideay.net.ni.</tt>.</p>
+  ::GUESS::
   <div>
     <canvas id="ni"></canvas>
   </div>

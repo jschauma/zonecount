@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .cd</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Democratic Republic of the Congo &#127464;&#127465;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file via <tt>AXFR</tt> from <tt>ns-root-22.scpt-network.net.</tt>.</p>
+  ::GUESS::
   <div>
     <canvas id="cd"></canvas>
   </div>

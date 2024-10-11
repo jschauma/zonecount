@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .id</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Indonesia &#127470;&#127465;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://pandi.id/api/v1/domain-statistics/legacy/stats">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="id"></canvas>
   </div>

@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .kr</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for South Korea &#127472;&#127479;; see also <a href="../xn--3e0b707e/">.xn--3e0b707e</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://krnic.or.kr/jsp/statboard/domain/reg/currentNation.jsp">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="kr"></canvas>
   </div>

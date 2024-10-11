@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Saint Helena, Ascension and Tristan da Cunha &#127480;&#127469;</p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.sh/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="sh"></canvas>
   </div>

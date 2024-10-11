@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .dk</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Denmark &#127465;&#127472;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://stats.punktum.dk/da/domains/total_domains">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="dk"></canvas>
   </div>

@@ -10,8 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  ::GUESS::
   <div>
     <canvas id="imdb"></canvas>
   </div>

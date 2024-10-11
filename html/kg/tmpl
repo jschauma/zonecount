@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .kg</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Kyrgyzstan &#127472;&#127468;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
+  ::GUESS::
   <div>
     <canvas id="kg"></canvas>
   </div>

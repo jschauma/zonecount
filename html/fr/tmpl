@@ -10,9 +10,11 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
   <p>ccTLD for France &#127467;&#127479;</p>
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published names found <a href="https://www.afnic.fr/produits-services/services-associes/donnees-partagees/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="fr"></canvas>
   </div>

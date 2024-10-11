@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>Internationalized ccTLD for Armenia (.հայ	) &#127462;&#127474;; see also <a href="../am/">.am</a></p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.amnic.net/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__y9a3aq"></canvas>
   </div>

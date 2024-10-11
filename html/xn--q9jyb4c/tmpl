@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--q9jyb4c</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized domain name みんな (<em lang="jp">minna</em>, everyone)</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__q9jyb4c"></canvas>
   </div>

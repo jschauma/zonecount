@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--fzc2c9e2c</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized ccTLD for Sri Lanka (.ලංකා) &#127473;&#127472; ; see also: <a href="../lk/">.lk</a> / <a href="../xn--xkc2al3hye2a/">.xn--xkc2al3hye2a</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__fzc2c9e2c"></canvas>
   </div>

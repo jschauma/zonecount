@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .eu</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for the European Union &#127466;&#127482;; see also <a href="../xn--e1a4c/">.xn--e1a4c</a> and <a href="../xn--qxa6a/">.xn--qxa6a</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://eurid.eu/en/welcome-to-eurid/statistics/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="eu"></canvas>
   </div>

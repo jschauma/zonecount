@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .ge</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Georgia &#127468;&#127466;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://nic.ge/en/administrator/statistics">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="ge"></canvas>
   </div>

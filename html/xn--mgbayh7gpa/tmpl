@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--mgbayh7gpa</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized ccTLD for Jordan (.الاردن) &#127471;&#127476;; see also: <a href="../jo/">.jo</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.dns.jo/stat.aspx">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__mgbayh7gpa"></canvas>
   </div>

@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .cl</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Chile &#127464;&#127473;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.nic.cl/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="cl"></canvas>
   </div>

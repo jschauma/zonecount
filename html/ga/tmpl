@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Gabon &#127468;&#127462;</p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.ga/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="ga"></canvas>
   </div>

@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .ie</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Ireland &#127470;&#127466;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.weare.ie/ie-domain-profile-report/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="ie"></canvas>
   </div>

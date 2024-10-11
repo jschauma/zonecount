@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--nqv7fs00ema</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized domain name 组织机构</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file from <a href="https://czds.icann.org/">CZDS</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__nqv7fs00ema"></canvas>
   </div>

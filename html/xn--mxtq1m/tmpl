@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--mxtq1m</h1>
 
   <hr class="noshade" style="width:100%;">
+  <p>Internationalized domain name .政府 ("public affairs")</p>
   ::HSTS::
-  ::GUESS::
-  <p>Interantionalized domain name .政府 ("public affairs")</p>
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__mxtq1m"></canvas>
   </div>

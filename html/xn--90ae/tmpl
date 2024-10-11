@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>Internationalized ccTLD for Bulgaria (.бг) &#127463;&#127468;; see also <a href="../bg/">.bg</a></p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.xn--90ae/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__90ae"></canvas>
   </div>

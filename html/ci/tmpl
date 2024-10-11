@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .ci</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for C&ocirc;te d'Ivoire &#127464;&#127470;</p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.nic.ci/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="ci"></canvas>
   </div>

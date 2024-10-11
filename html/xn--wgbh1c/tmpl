@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>Internationalized ccTLD for Egypt (.مصر	) &#127466;&#127468;; see also <a href="../eg/">.eg</a></p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file via AXFR from <code>ns1.dotmasr.eg.</code></p>
+  ::GUESS::
   <div>
     <canvas id="xn__wgbh1c"></canvas>
   </div>

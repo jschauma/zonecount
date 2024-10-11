@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .th</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>ccTLD for Thailand &#127481;&#127469;; see also <a href="../xn--o3cw4h/">.xn--o3cw4h</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.thnic.co.th/stats">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="th"></canvas>
   </div>

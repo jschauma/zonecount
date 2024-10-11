@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>Internationalized ccTLD for Qatar (.قطر) &#127478;&#127462;; see also <a href="../qa/">.qa</a></p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.xn--wgbl6a/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__wgbl6a"></canvas>
   </div>

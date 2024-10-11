@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>ccTLD for Burkina Faso &#127463;&#127467;</p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.registre.bf/index.php/statistiques/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="bf"></canvas>
   </div>

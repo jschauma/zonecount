@@ -10,8 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Zone file via <tt>AXFR</tt> from one of <tt>.arpa</tt>'s NS records.</p>
+  ::GUESS::
   <div>
     <canvas id="arpa"></canvas>
   </div>

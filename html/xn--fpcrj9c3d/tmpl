@@ -11,8 +11,10 @@
   <hr class="noshade" style="width:100%;">
   <p>Internationalized ccTLD for India (.భారత్) &#127470;&#127475;; see also <a href="../in/">.in</a></p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="https://www.verisign.xn--fpcrj9c3d/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__fpcrj9c3d"></canvas>
   </div>

@@ -9,10 +9,12 @@
   <h1>Zone stats: # of domains in .xn--lgbbat1ad8j</h1>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
   <p>Internationalized ccTLD for Algeria (.الجزائر) &#127465;&#127487;; see also: <a href="../dz/">.dz</a></p>
+  ::HSTS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Published stats found <a href="http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/">here</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__lgbbat1ad8j"></canvas>
   </div>

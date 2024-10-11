@@ -9,8 +9,9 @@
   <h1>Zone stats: # of domains in .nz</h1>
 
   <hr style="border-style:solid; width:100%;">
-  <p>ccTLD for New Zealand &#127475;&#127487;</p>
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Manually compiled statistics from <a href="https://docs.internetnz.nz/registry/stats/">here</a>.</p>
+  ::GUESS::
 
   <div>
     <canvas id="nz"></canvas>
@@ -32,8 +33,9 @@
   </small>
 
   <hr class="noshade" style="width:100%;">
+  <p>ccTLD for New Zealand &#127475;&#127487;</p>
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
 
   <script src="../chart.js"></script>
   <script src="./::TLD::.js"></script>

@@ -10,8 +10,10 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
+  <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: <a href="https://www.icann.org/resources/pages/registry-reports/">ICANN Registry Reports</a></p>
+  ::GUESS::
   <div>
     <canvas id="xn__kput3i"></canvas>
   </div>

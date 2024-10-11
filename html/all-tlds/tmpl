@@ -10,7 +10,7 @@
 
   <hr class="noshade" style="width:100%;">
   ::HSTS::
-  ::GUESS::
+  ::WHOIS::
   <div>
     <canvas id="all_tlds"></canvas>
   </div>
