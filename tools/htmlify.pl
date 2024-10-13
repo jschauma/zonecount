@@ -140,7 +140,7 @@ sub getWhois($) {
 
 	if (scalar(@orgs) > 1) {
 		$tech = $orgs[2];
-		if ($tech eq $delegated) {
+		if (($tech) && ($tech eq $delegated)) {
 			$tech = "";
 		}
 	}
