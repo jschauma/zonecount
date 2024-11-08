@@ -399,6 +399,16 @@ countNames() {
 
 	local subdomains
 
+	# CZDS may return an error instead of data,
+	# which then ends up as HTML in the given
+	# file.  Let's ignore and clean up those
+	# files.
+	if ! file ${file} | grep -q "compressed data"; then
+		echo "Not compressed data, removing ${file}." >&2
+		rm ${file}
+		return
+	fi
+
 	zcat ${file} | \
 		awk "tolower(\$0) ~ /^[^.]*.${tld}.[ 	].*[iI][nN][ 	]*[nN][sS][ 	]/ {print \$1}" | \
 		sort -u | xz -q -9 > ${NAMESDIR}/${tld}.xz.not && \
@@ -478,7 +488,7 @@ dedupeCountFile() {
 			}
 		}
 		END { print }' > ${TDIR}/f && \
-			mv ${TDIR}/f ${COUNTDIR}/${f}
+			sort -n -u ${TDIR}/f > ${COUNTDIR}/${f}
 }
 
 excludeForced() {
@@ -1891,6 +1901,8 @@ fillTopTen() {
 	local data labels
 	local toptencount percent total
 
+	verbose "Creating topten.html..." 3
+
 	cat ${HTMLDIR}/.topten-head > ${HTMLDIR}/topten.html
 
 	oIFS="${IFS}"
@@ -1977,6 +1989,7 @@ generateHTML() {
 	done | sort -rn | grep -v "all-tlds" > .all-sorted
 
 	# all.html
+	verbose "Creating all.html..." 3
 	(
 	sed -e "s/::DATE::/${DATE}/g" ${HTMLDIR}/.all-head
 
@@ -2008,6 +2021,7 @@ generateHTML() {
 	) > ${HTMLDIR}/all.html
 
 	# index.html
+	verbose "Creating index.html..." 3
 	cat >${HTMLDIR}/.index-middle <<EOF
   <p>As of $(date +%Y-%m-%d), this page shows stats for ${numFound} TLDs (${numValid}/${numTLDs} or around ${percent}% of currently valid TLDs; ${numExtra} now inactive TLDs),
      counting a total of ${grandTotal} second-level domains.  You can download
