@@ -211,6 +211,9 @@ GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw by bz 
 
 NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
+DEFAULT_IFS=" 	
+"
+
 ###
 ### Functions
 ###
@@ -677,6 +680,7 @@ fetchCaCount() {
 	if [ -n "${count}" ]; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ca
 	fi
+
 }
 
 
@@ -708,12 +712,12 @@ fetchCctlds() {
 		if [ x"${domain}" != x"." ]; then
 			set +u
 			sub=$(eval echo $(echo \${SUBDOMAINS_$(echo ${domain%%.} | tr '[a-z]' '[A-Z]')}))
-			oIFS="${IFS}"
+			prevIFS="${IFS}"
 			IFS=" "
 			for s in ${sub}; do
 				axfr ${domain} ${ns} "" ${s}
 			done
-			IFS="${oIFS}"
+			IFS="${prevIFS}"
 			set -u
 		fi
 	done
@@ -1858,8 +1862,10 @@ fetchStats() {
 		fi
 	fi
 
+	IFS="${DEFAULT_IFS}"
 	for tld in ${HAVE_STATS}; do
 		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${tld%.}"; then
+			verbose "Skipping ${tld%.}..." 2
 			continue
 		fi
 
@@ -2510,3 +2516,5 @@ fi
 if matchType "git"; then
 	gitCommit
 fi
+
+verbose "All done - goodbye!"
