@@ -93,6 +93,9 @@ xn--ygbi2ammx. bilal.pnina.ps."
 
 FORCED_ZONES="com net nu se"
 
+# Defunct since approx 2024-12-23
+# cw.
+
 HAVE_STATS="ae.
 am.
 ar.
@@ -109,7 +112,6 @@ ci.
 cl.
 cn.
 com.
-cw.
 cz.
 de.
 dk.
@@ -145,6 +147,7 @@ mp.
 mx.
 my.
 net.
+nc.
 nl.
 no.
 nu.
@@ -207,7 +210,7 @@ SUBDOMAINS_SL="com edu gov net org"
 
 ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na nc ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
+GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly md me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--j1amh xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
 
 NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
@@ -520,7 +523,7 @@ fetchAeCount() {
 			sed -n -e 's/.*<p class="font-weight-bold.*>\([0-9,]*\)<.*/\1/p' | \
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ae
 	fi
 }
@@ -553,7 +556,7 @@ fetchArCount() {
 			grep -m 1 -A 17 "<tbody" | tail -1 |		\
 			sed -e 's/.*>\(.*\)<.*/\1/' | tr -d '.')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ar
 	fi
 }
@@ -567,7 +570,7 @@ fetchAtCount() {
 			sed -n -e '/domain_counts_total/{s/.*domain_counts_total">\([0-9,]*\)<.*/\1/p;q;}' | \
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/at
 	fi
 }
@@ -581,7 +584,7 @@ fetchAuCount() {
 			grep -m 1 -B 1 ".au domains registered" |	\
 			head -1 | tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/au
 	fi
 }
@@ -594,7 +597,7 @@ fetchAzCount() {
 	count=$(curl -s "https://whois.az/?page_id=783" | \
 			sed -n -e 's|.*<td>Total:</td><td>\([0-9]*\)</td>.*|\1|p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/az
 	fi
 }
@@ -607,7 +610,7 @@ fetchBaCount() {
 			grep -m 1 -A 3 ">Total<" | tail -1 |		\
 			sed -e 's/.*>\(.*\)<.*/\1/')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ba
 	fi
 }
@@ -620,7 +623,7 @@ fetchBeCount() {
 	count=$(curl -s https://www.dnsbelgium.be/api/statistics |	\
 			jq -r '.be.total')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/be
 	fi
 }
@@ -635,7 +638,7 @@ fetchBfCount() {
 			grep -B1 "Nom de Domaine" |				\
 			sed -n -e 's/.*data-num="\([0-9]*\)".*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/bf
 	fi
 }
@@ -649,7 +652,7 @@ fetchBnCount() {
 			grep -m 1 -A 5 "<h3>Registered .BN Domains</h3>" |	\
 			tail -1 | sed -e 's/.*>\([0-9]*\) Domains.*/\1/')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/bn
 	fi
 }
@@ -662,7 +665,7 @@ fetchBrCount() {
 	count=$(curl -s https://registro.br/nicstats.json | \
 			jq -r '.dominios.total' | tr -d '.')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/br
 	fi
 }
@@ -677,7 +680,7 @@ fetchCaCount() {
 		sed -n -e 's/.*c-site-footer_counter_label.*bottom">\([0-9,]*\)<.*/\1/p' | \
 		tr -d ',')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ca
 	fi
 
@@ -730,6 +733,9 @@ fetchCctlds() {
 	if [ -z "${TLDS}" ] || contains "${TLDS}" "fr"; then
 		fetchFr
 	fi
+	if [ -z "${TLDS}" ] || contains "${TLDS}" "nc"; then
+		fetchNc
+	fi
 	if [ -z "${TLDS}" ] || contains "${TLDS}" "sk"; then
 		fetchSk
 	fi
@@ -746,7 +752,7 @@ fetchCiCount() {
 		sed -n -e 's/.*>\([0-9 ]*\) noms de Domaine<.*/\1/p' |	\
 		tr -d ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ci
 	fi
 }
@@ -761,7 +767,7 @@ fetchCnCount() {
 			sed -n -e 's/^Domain Names:\(.*\)million/\10000/p' |	\
 			tr -d '.')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/cn
 	fi
 }
@@ -776,7 +782,7 @@ fetchClCount() {
 		sed -n -e 's/.*<div id="numdominios"><span class="numerogrande">\([0-9.]*\)<.*/\1/p' | \
 		tr -d '.')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/cl
 	fi
 }
@@ -795,7 +801,7 @@ fetchComAndNetCount() {
 		sed -e 's/.*"\([0-9,]*\)".*/\1/' | \
 		tr -d ',' | tr '\n' ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count%% *} >> ${COUNTDIR}/com
 		echo ${DATE} ${count#* } >> ${COUNTDIR}/net
 	fi
@@ -810,7 +816,7 @@ fetchCwCount() {
 			sed -n -e 's|<span style="margin-left: 20px;">||gp' | \
 			tr '' '\n' | grep -c "</span><br")"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/cw
 	fi
 }
@@ -823,7 +829,7 @@ fetchCzCount() {
 	count="$(curl -s -H 'accept: application/json' https://stats.nic.cz/fred_domains_latest | \
 		jq '.[] | select(.zone=="cz") | .domains')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/cz
 	fi
 }
@@ -837,7 +843,7 @@ fetchDeCount() {
 			sed -n -e 's/.*<p class="count-total"><span class="number">\([0-9.]*\)<\/span> .de-Domains.*/\1/p' | \
 			tr -d '.')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/de
 	fi
 }
@@ -851,7 +857,7 @@ fetchDkCount() {
 		"https://wabi-west-europe-b-primary-api.analysis.windows.net/public/reports/querydata?synchronous=true" --compressed | \
 		jq -r '.results[0].result.data.dsr.DS[0].PH[0].DM0 | last | .C | last')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/dk
 	fi
 }
@@ -865,7 +871,7 @@ fetchDoCount() {
 	count="$(curl -k -s https://nic.do/estadisticas/files/dominios.csv | \
 			awk -F, '/^Total/ { print $2}')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/do
 	fi
 }
@@ -877,12 +883,12 @@ fetchDzCount() {
 
 	count="$(curl -k -s https://api.nic.dz/v1/domains/count)"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/dz
 	fi
 
 	count="$(curl -k -s https://api.nic.dz/v1/arabic/domains/count)"
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--lgbbat1ad8j
 	fi
 }
@@ -895,7 +901,7 @@ fetchEcCount() {
 	count="$(curl -s https://www.nic.ec/preguntas-frecuentes.php | \
 			sed -n -e '/animateValue(obj, 0/ { s/.*, \([0-9]*\),.*/\1/p; q; }')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ec
 	fi
 }
@@ -908,21 +914,21 @@ fetchEuCount() {
 	count="$(awk -F, '/var countUpEuStatGeneralEU/ { print $2; exit; }' ${TDIR}/eu | \
 			tr -d ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/eu
 	fi
 
 	count="$(awk -F, '/var countUpEuStatGeneralGreek/ { print $2; exit; }' ${TDIR}/eu | \
 			tr -d ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--qxa6a
 	fi
 
 	count="$(awk -F, '/var countUpEuStatGeneralCyrillic/ { print $2; exit; }' ${TDIR}/eu | \
 			tr -d ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--e1a4c
 	fi
 
@@ -938,7 +944,7 @@ fetchEsCount() {
 			sed -n -e 's/.*Ya somos.*>\([0-9.]*\)<\/p>.*/\1/p' |	\
 			tr -d '.')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/es
 	fi
 }
@@ -953,7 +959,7 @@ fetchFiCount() {
 	count=$(curl -s -H 'Accept: application/json' "${url}/${link}" | \
 			jq -r '."odata.count"')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/fi
 	fi
 }
@@ -967,7 +973,7 @@ fetchFoCount() {
 		sed -n -e 's/.*> \([0-9.]*\)<.*> .fo-heimas.*/\1/p' |	\
 			tr -d '.')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/fo
 	fi
 }
@@ -1012,7 +1018,7 @@ fetchGeCount() {
 			tail -1 | sed -e 's/.*<p>\([0-9,]*\)<.*/\1/' |	\
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ge
 	fi
 }
@@ -1025,7 +1031,7 @@ fetchGtCount() {
 	count=$(curl -s https://www.gt/estadisticas/data.json | \
 			jq '[.estadisticas[].count] | add')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/gt
 	fi
 }
@@ -1094,7 +1100,7 @@ fetchGuessedStats() {
 		count=$(grep -A1 "tldpedia/${d}\"" ${TDIR}/guessed |		\
 				sed -n -e 's/.*amount">\([0-9,]*\)<.*/\1/p' |	\
 				tr -d ',')
-		if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 			echo ${DATE} ${count} >> ${COUNTDIR}/${d}
 			uniq ${COUNTDIR}/${d} > ${COUNTDIR}/.x
 			mv ${COUNTDIR}/.x ${COUNTDIR}/${d}
@@ -1125,7 +1131,7 @@ if (/.*?tr><tr><td>(.*?)<\\\/tr>.*/) {
 	exit;
 }')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count% *} >> ${COUNTDIR}/hk
 		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--j6w193g
 	fi
@@ -1139,7 +1145,7 @@ fetchHrCount() {
 	count=$(curl -s https://www.domene.hr/en/portal/home |	\
 			sed -n -e 's/.*NUMBER OF REGISTERED .HR DOMAINS.*>\([0-9]*\)<.*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/hr
 	fi
 }
@@ -1154,7 +1160,7 @@ fetchHtCount() {
 			sed -n -e 's/.*data-digit="\([0-9]*\)".*/\1+/p' |	\
 			tr -d '\n' | sed -e 's/\+$//' | bc)
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ht
 	fi
 }
@@ -1167,7 +1173,7 @@ fetchHuCount() {
 	count=$(curl -s https://info.domain.hu/stats/generated/info-domain-stat-getdata_a.json | \
 			jq -r '.[0].data | last[1]')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/hu
 	fi
 }
@@ -1199,7 +1205,7 @@ fetchIcannStats() {
 		# the last possible day of every month.
 		date="$(echo "${link}" | sed -e "s/.*${tld}-transactions-\([0-9]*\)-.*/\1/")28"
 
-		if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 			echo ${date} ${count} >> ${COUNTDIR}/${tld}
 			uniq ${COUNTDIR}/${tld} > ${COUNTDIR}/.x
 			mv ${COUNTDIR}/.x ${COUNTDIR}/${tld}
@@ -1215,7 +1221,7 @@ fetchIdCount() {
 	count=$(curl -s https://pandi.id/api/v1/domain-statistics/legacy/stats | \
 			jq -r '.data.registered_total')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/id
 	fi
 }
@@ -1229,7 +1235,7 @@ fetchIeCount() {
 			sed -n -e 's/.*<div class="counter">\([0-9,]*\)<.*/\1/p' | \
 			head -1 | tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ie
 	fi
 }
@@ -1245,7 +1251,7 @@ fetchIlCount() {
 		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
 		tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/il
 	fi
 
@@ -1253,7 +1259,7 @@ fetchIlCount() {
 		tail -1 | sed -e 's/.*domainvalue">\([0-9,]*\)<.*/\1/' |	\
 		tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--4dbrk0ce
 	fi
 
@@ -1269,7 +1275,7 @@ fetchIrCount() {
 			egrep -A1 "(>ایران<)|primary-cell" | \
 			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p' | tr '\n' ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		idn=${count%% *}
 		ir=${count#* }
 		total=$(( ${ir} - ${idn} ))
@@ -1288,7 +1294,7 @@ fetchIsCount() {
 			tail -4 | 			\
 			awk -F'[><]' '{ if ((NR == 1) || (NR == 4)) { sum += $3 }} END { print sum }')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/is
 	fi
 }
@@ -1301,7 +1307,7 @@ fetchItCount() {
 	count=$(curl -s https://api.nic.it/v2/stats/public/domain/counter | \
 			jq -r '.counter')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/it
 	fi
 }
@@ -1315,14 +1321,14 @@ fetchJoCount() {
 	curl -k -s https://dns.jo/DomStat.aspx | sed -e 's|<TR||g' | tr '' '\n' > ${TDIR}/f
 
 	xncount=$(<${TDIR}/f sed -n -e 's/.*>\([0-9]*\)<\/TD><TD.*/\1/p' | grep . | tail -1)
-	if [ -n "${xncount}" ]; then
+	if isNumber "${xncount}"; then
 		echo ${DATE} ${xncount} >> ${COUNTDIR}/xn--mgbayh7gpa
 	fi
 
 	count=$(<${TDIR}/f sed -n -e 's/.*<B>\([0-9]*\)<\/B>.*<TD.*/\1/p')
 
-	if [ -n "${count}" ]; then
-		if [ -n "${xncount}" ]; then
+	if isNumber "${count}"; then
+		if isNumber "${xncount}"; then
 			count=$(( ${count} - ${xncount} ))
 		fi
 		echo ${DATE} ${count} >> ${COUNTDIR}/jo
@@ -1338,7 +1344,7 @@ fetchJpCount() {
 	count=$(curl -s https://jprs.co.jp/en/stat/ | \
 			sed -n -e 's/.*<p>The number of JP domain name registrations.* \([0-9]*\)).*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/jp
 	fi
 }
@@ -1350,7 +1356,7 @@ fetchKeCount() {
 
 	count=$(curl -s https://kenic.or.ke/ |			\
 		sed -n -e '/counter-nmber/ {s/.*data-to="\([0-9]*\)".*/\1/p; q;}')
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ke
 	fi
 }
@@ -1365,7 +1371,7 @@ fetchKrCount() {
 		tr -d ',' | awk '{ nums[NR] = $1;} END { print nums[1] " " nums[3]; }')
 
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count% *} >> ${COUNTDIR}/kr
 		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--3e0b707e
 	fi
@@ -1379,7 +1385,7 @@ fetchLtCount() {
 	count=$(curl -s https://www.domreg.lt/export/currcounts.json | \
 			jq -r '.registered')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/lt
 	fi
 }
@@ -1393,7 +1399,7 @@ fetchLuCount() {
 			grep -m 1 -A1 '<div class="statistic-block__number">' |	\
 			tail -1 | tr -d ',' | tr -d ' ')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/lu
 	fi
 }
@@ -1406,7 +1412,7 @@ fetchMaCount() {
 	count=$(curl -s https://www.registre.ma/language/en/resources/e-statistiques | \
 			sed -n -e '/Class="odometer/ { s/.*>\([0-9]*\)<.*/\1/p; q; }')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ma
 	fi
 }
@@ -1420,7 +1426,7 @@ fetchMkCount() {
 	count=$(curl -s https://marnet.mk/en/ |
 			sed -n -e 's/.*data-counter-value="\([0-9]*\)".*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/mk
 	fi
 }
@@ -1436,7 +1442,7 @@ fetchMxCount() {
 		tail -1 | 		\
 		awk -F, '{ print $NF }')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/mx
 	fi
 }
@@ -1449,9 +1455,19 @@ fetchMyCount() {
 	count=$(curl -s "https://mynic.my/ajax/statistics?type=active&year=${DATE_Y}" | \
 			jq -r '.tableData.total | [.[]] | .[0]')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/my
 	fi
+}
+
+fetchNc() {
+	local count
+
+	verbose "nc (names only)..." 2
+
+	curl -s "https://www.domaine.nc/whos?who=A*" |			\
+		sed -n -e '/whos?domain=/s/.*>\(.*\)<\/a.*/\1/p' |	\
+		xz -q -9 > ${NAMESDIR}/nc.xz
 }
 
 fetchNlCount() {
@@ -1462,7 +1478,7 @@ fetchNlCount() {
 	count=$(curl -s https://stats.sidnlabs.nl/assets/data/registration-hist.json | \
 			jq -r '.tot | last | .[1]')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/nl
 	fi
 }
@@ -1478,7 +1494,7 @@ fetchNoCount() {
 		sed -n -e 's/ *\(.*\)<\/div>/\1/p' |				\
 		tr -d ' ')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/no
 	fi
 }
@@ -1493,7 +1509,7 @@ fetchNuOrSeCount() {
 			sed -n -e 's/.*Internetstiftelsen.data.* = \({.*}\);.*/\1/p' | \
 			jq -r 'select(.interval == false) | .json | last | .value')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/${which}
 	fi
 }
@@ -1506,7 +1522,7 @@ fetchPeCount() {
 	count=$(curl -s https://punto.pe/ | \
 			sed -n -e 's|^.*<span class="num">\([0-9]*\).*|\1|p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/pe
 	fi
 }
@@ -1519,7 +1535,7 @@ fetchPlCount() {
 	count=$(curl -s https://www.dns.pl/api/zone-stats | \
 			jq -r '.stats.rows[0] | .[2]')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/pl
 	fi
 }
@@ -1534,7 +1550,7 @@ fetchPtCount() {
 			sed -n -e 's/.*"registered": "\([0-9]*\)","details": .<span class="title">Total dom.*/\1/p' | \
 			tail -1)
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/pt
 	fi
 }
@@ -1548,7 +1564,7 @@ fetchRsCount() {
 			sed -n -e 's/.*frontpage_number_of_domains_srb_domains_num.*>\([0-9]*\)<.*/\1/p' | \
 			tr '\n' ' ')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count%% *} >> ${COUNTDIR}/rs
 		echo ${DATE} ${count#* } | \
 			sed -e 's/ 0*/ /' >> ${COUNTDIR}/xn--90a3ac
@@ -1563,14 +1579,14 @@ fetchRuCount() {
 	count=$(curl -s https://statdom.ru/rest/_stats/ru/$(date +%Y-%m-%d) | \
 			jq -r '.total')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ru
 	fi
 
 	count=$(curl -s https://statdom.ru/rest/_stats/%D1%80%D1%84/$(date +%Y-%m-%d) | \
 			jq -r '.total')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--p1ai
 	fi
 }
@@ -1585,12 +1601,12 @@ fetchSaCount() {
 	#count=$(jq -r '.domains_per_year_acc | last | .domains' ${TDIR}/sa)
 	count=$(jq -r '.domains_per_year_acc' ${TDIR}/sa)
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/sa
 	fi
 
 	count=$(jq -r '.domains_per_zone | .[] | select(.zone == ".السعودية") | .domains' <${TDIR}/sa)
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--mgberp4a5d4ar
 	fi
 
@@ -1608,7 +1624,7 @@ fetchSgCount() {
 			sed -n -e 's/.*">\([0-9,]*\)<.*/\1/p' |			\
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/sg
 	fi
 }
@@ -1623,7 +1639,7 @@ fetchSiCount() {
 			sed -n -e 's/.*number">\([0-9.]*\)<.*/\1/p' |	\
 			tr -d '.')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/si
 	fi
 }
@@ -1638,7 +1654,7 @@ fetchThCount() {
 			sed -n -e 's/.*td>\([0-9,]*\)<.*/\1/p' |	\
 			tr -d ',' | tr '\n' ' ')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count%% *} >> ${COUNTDIR}/th
 		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--o3cw4h
 	fi
@@ -1652,14 +1668,14 @@ fetchTnCount() {
 	count="$(curl -s https://www.registre.tn/stats/stats/tmpFILES-stats04/stats04-data.tn | \
 			sed -n -e 's/.*,\([0-9]*\)\]\]$/\1/p')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/tn
 	fi
 
 	count="$(curl -s https://www.registre.tn/stats/stats/tmpFILES-stats04/stats04-data.tounes | \
 			sed -n -e 's/.*,\([0-9]*\)\]\]$/\1/p')"
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/xn--pgbs0dh
 	fi
 }
@@ -1674,7 +1690,7 @@ fetchTrCount() {
 			sed -n -e 's/.*<p.*>\([0-9.]*\)<.*/\1/p' |	\
 			tr -d '.')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/tr
 	fi
 }
@@ -1692,7 +1708,7 @@ fetchTwCount() {
 				"\(."網域名稱") \(."數量")" ' | \
 			awk '{ f[$1] = $2} END { for (d in f) { sum += f[d]; } print sum; }')
 
-	if [ -n "${idncount}" ]; then
+	if isNumber "${idncount}"; then
 		echo ${DATE} ${idncount} >> ${COUNTDIR}/xn--kpry57d
 	fi
 
@@ -1702,7 +1718,7 @@ fetchTwCount() {
 				"\(."網域名稱") \(."數量")" ' | \
 			awk '{ f[$1] = $2} END { for (d in f) { sum += f[d]; } print sum; }')
 
-	if [ -n "${twcount}" ] && [ ${twcount} -gt 0 ]; then
+	if isNumber "${twcount}" && [ ${twcount} -gt 0 ]; then
 		echo ${DATE} ${twcount} >> ${COUNTDIR}/tw
 	fi
 
@@ -1718,7 +1734,7 @@ fetchTzCount() {
 			grep -m 1 -B 1 '<p><a href="/domains/list/">Registered .TZ domain names</a></p>' | \
 			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/tz
 	fi
 }
@@ -1732,7 +1748,7 @@ fetchUaCount() {
 			grep -m 1 -A 1 '<td class="tdrr">' |		\
 			sed -n -e 's/.*>\([0-9]*\)<.*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ua
 	fi
 }
@@ -1749,7 +1765,7 @@ fetchUkCount() {
 			perl -pe 's|.*class="Third-level">([0-9,]+)</td><td .*?class="Second-level">([0-9,]+)</td></tr></tbody>.*|$1 $2|' | \
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		count=$(echo $count | tr ' ' '+' | bc)
 		echo ${DATE} ${count} >> ${COUNTDIR}/uk
 	fi
@@ -1785,7 +1801,7 @@ fetchUyCount() {
 			grep -A1 "Total UY" | \
 			sed -n -e 's/.*">\([0-9]*\)<.*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/uy
 	fi
 }
@@ -1799,7 +1815,7 @@ fetchUzCount() {
 			sed -n -e '/<td>[0-9 ]/ { s/.*td>\([0-9 ]*\)<.*/\1/p; q; }' | \
 			tr -d ' ')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/uz
 	fi
 }
@@ -1813,7 +1829,7 @@ fetchVnCount() {
 			sed -n -e '/title-thong-ke/ { s/.*>\([0-9,]*\)<.*/\1/p; q; }' | \
 			tr -d ',')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/vn
 	fi
 }
@@ -1826,7 +1842,7 @@ fetchZaCount() {
 	count=$(curl -s "https://www.zadna.org.za/" |
 			sed -n -e 's/.*data-digit="\([0-9]*\)".*/\1/p')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/za
 	fi
 }
@@ -1884,7 +1900,7 @@ fetchSuCount() {
 	count=$(curl -s https://statdom.ru/rest/_stats/su/$(date +%Y-%m-%d) | \
 			jq -r '.total')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/su
 	fi
 }
@@ -1896,7 +1912,7 @@ fetchSvCount() {
 			sed -n -e 's/.*data-to-value="\([0-9]*\)".*/\1/p' | \
 			awk '{sum += $1} END { print sum }')
 
-	if [ -n "${count}" ]; then
+	if isNumber "${count}"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/sv
 	fi
 }
@@ -2151,6 +2167,16 @@ identifyNSECZones() {
         done
 }
 
+isNumber() {
+	local i="${1}"
+
+	if [ -n "${i}" ] && expr "${i}" : "[0-9]*$" >/dev/null 2>&1 ; then
+		return 0
+	fi
+
+	return 1
+}
+
 ldnsWalk() {
 	local domain="${1%.}"
 	local ns="${2:-""}"
@@ -2280,8 +2306,10 @@ printLinkTable() {
 	local which="${2}"
 	local count files guessed fill
 
+	verbose "Generating ${which} table..." 3
+
 	if [ x"${which}" = x"valid" ]; then
-		ignore=$(sed -e 's/\.$//' ${TDIR}/.extra | tr '\n' '|' | sed -e 's/|$//')
+		ignore="all-tlds|$(sed -e 's/\.$//' ${TDIR}/.extra | tr '\n' '|' | sed -e 's/|$//')"
 		files=$(ls | egrep -v "(${ignore})")
 	else
 		files=$(sed -e 's/\.$//' ${TDIR}/.extra)
