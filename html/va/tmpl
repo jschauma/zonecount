@@ -25,6 +25,12 @@
   <p><a href="va.png">Static gnuplot image for .va</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
+  <p>Spikes:
+    <ul>
+      <li>20241128 - 20241202: <a
+href="https://lists.dns-oarc.net/pipermail/dns-operations/2024-December/022734.html">some NS were temporarily wildcarded</a>
+    </ul>
+  </p>
 
   <hr class="noshade" style="width:100%;">
   <small>
