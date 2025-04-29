@@ -14,3 +14,11 @@ The directories in here are:
 * html/ -- containing a few template files
 * html/TLD/ -- containing per-TLD template and data files
 * tools/ -- scripts used to generate the stats
+
+License
+=======
+
+Unless otherwise noted (e.g., as in the code headers
+of the tools), all data (such as, but limited to, the
+counts files) provided here is [CC BY-NC
+4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode.en).
