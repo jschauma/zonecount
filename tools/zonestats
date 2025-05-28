@@ -325,7 +325,7 @@ checkCountFiles() {
 
 	cd ${COUNTDIR}
 	for f in *; do
-		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${f}"; then
+		if [ -n "${TLDS}" ] && ! contains "${TLDS}" "${f}" && [ ${FORCE} -lt 2 ]; then
 			continue
 		fi
 
@@ -344,20 +344,8 @@ checkCountFiles() {
 			echo "Skipping empty file '${f}'?" >&2
 			continue
 		fi
-		if [ ${last} -gt ${prev} ]; then
-			if [ ${last} -eq 0 ]; then
-				diff=100
-			else
-				diff=$(echo "scale=4; 100 - ${prev}/${last} * 100" | bc -l )
-			fi
-		elif [ ${prev} -gt ${last} ]; then
-			if [ ${prev} -eq 0 ]; then
-				diff=100
-			else
-				diff=$(echo "scale=4; 100 - ${last}/${prev} * 100" | bc -l )
-			fi
-		fi
-		if [ $(( $(echo "${diff} > 10" | bc) )) -gt 0 ]; then
+		diff=$(echo "scale=4; (${prev} - ${last})/${prev} * 100" | bc -l | sed -E 's/^(-)?\./\10./')
+		if [ "${diff%%.*}" -gt 10 ] || [ "${diff%%.*}" -lt -10 ]; then
 			diff="${diff%%0*}"
 			echo "${f}: >10% change (${diff}%: prev: ${prev}, now: ${last})"
 		fi
