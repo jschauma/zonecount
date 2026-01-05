@@ -6,9 +6,10 @@
   </head>
   <body>
 
-  <h1>Zone stats: # of domains in 网址 ("(written) Chinese (language) network")</h1>
+  <h1>Zone stats: # of domains in xn--ses554g</h1>
 
   <hr class="noshade" style="width:100%;">
+  <p>网址 ("web address")</p>
   ::HSTS::
   ::WHOIS::
   <p>DNSSEC: ::DNSSEC::</p>

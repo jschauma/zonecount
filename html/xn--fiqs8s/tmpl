@@ -9,6 +9,10 @@
   <h1>Zone stats: # of domains in .xn--fiqs8s</h1>
 
   <hr style="border-style:solid; width:100%;">
+  <p>Internationalized ccTLD <tt>.中国</tt> for China &#127464;&#127475; (see also: <a href="../cn/">.cn</a>)</p>
+  ::HSTS::
+  ::WHOIS::
+
   <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Manually compiled stats from <a href="https://www.cnnic.com.cn/IDR/ReportDownloads/">CCNIC's biannual reports</a>.</p>
   ::GUESS::
@@ -33,10 +37,6 @@
   </small>
 
   <hr class="noshade" style="width:100%;">
-  <p>Internationalized ccTLD <tt>.中国</tt> for China &#127464;&#127475; (see also: <a href="../cn/">.cn</a>)</p>
-  ::HSTS::
-  ::WHOIS::
-
   <script src="../chart.js"></script>
   <script src="./::TLD::.js"></script>
   </body>

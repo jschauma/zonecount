@@ -13,7 +13,7 @@
   ::HSTS::
   ::WHOIS::
   <p>DNSSEC: ::DNSSEC::</p>
-  <p>Source: Published stats found <a href="https://www.nominet.uk/news/reports-statistics/">here</a></p>
+  <p>Source: Published stats found <a href="https://nominet.uk/reports-and-statistics/">here</a></p>
   ::GUESS::
   <div>
     <canvas id="uk"></canvas>

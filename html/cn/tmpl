@@ -11,6 +11,7 @@
   <hr style="border-style:solid; width:100%;">
   <p>ccTLD for China &#127464;&#127475; (see also: <a href="../xn--fiqs8s">.xn--fiqs8s</a>)</p>
   ::HSTS::
+  ::GUESS::
   ::WHOIS::
   <p>DNSSEC: ::DNSSEC::</p>
   <p>Source: Manually compiled statistics including subdomains
@@ -37,9 +38,6 @@
   </small>
 
   <hr class="noshade" style="width:100%;">
-  ::HSTS::
-  ::GUESS::
-  ::WHOIS::
 
   <script src="../chart.js"></script>
   <script src="./::TLD::.js"></script>

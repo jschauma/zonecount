@@ -13,7 +13,6 @@
   ::HSTS::
   ::WHOIS::
   <p>DNSSEC: ::DNSSEC::</p>
-  <p>Source: NSEC discovery using <a href="https://github.com/NLnetLabs/ldns">ldns-walk</a></p>
   ::GUESS::
   <div>
     <canvas id="sl"></canvas>

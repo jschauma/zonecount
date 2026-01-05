@@ -13,7 +13,7 @@
   ::HSTS::
   ::WHOIS::
   <p>DNSSEC: ::DNSSEC::</p>
-  <p>Source: Published stats found <a href="https://www.verisign.xn--j1amh/en_US/channel-resources/domain-registry-products/zone-file/index.xhtml">here</a></p>
+  <p>Source: Published stats found <a href="https://www.hostmaster.ua/UAstat/">here</a></p>
   ::GUESS::
   <div>
     <canvas id="xn__j1amh"></canvas>

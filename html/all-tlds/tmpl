@@ -21,6 +21,7 @@
   <p><a href="all-tlds.png">Static gnuplot image for all TLDs</a>&nbsp;|&nbsp;<a href="../">Other zone stats</a></p>
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
+<!-- 
   <p>Spikes:
     <ul>
       <li>20230807: added <code><a href="../cn/">.cn</a></code> and <code><a href="../xn--fiqs8s/">.xn--fiqs8s</a></code></li>
@@ -32,6 +33,7 @@
       <li>20230929: corrected stats for <code><a href="../fr/">.fr</a></code></li>
     </ul>
   </p>
+-->
 
   <hr class="noshade" style="width:100%;">
   <small>
