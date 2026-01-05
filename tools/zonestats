@@ -1953,7 +1953,7 @@ EOF
 		data="${data}^        data_${d}.data.slice(-1)[0].y,"
 		count=$(( ${count} + 1 ))
 
-		echo "  <script src=\"/tldstats/${d}/data.js\"></script>" >> ${HTMLDIR}/topten.html
+		echo "  <script src=\"/tldstats/${d}/${d}.js\"></script>" >> ${HTMLDIR}/topten.html
 	done
 	IFS="${oIFS}"
 
