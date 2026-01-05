@@ -266,22 +266,25 @@ if ($GUESSED eq "true") {
 }
 
 my ($whoisDelegated, $whoisTechnical, $registryUrl, $created) = getWhois($TLD);
+
 my $whoisMessage = "";
+if ($TLD ne "all_tlds") {
+	$whoisMessage = "<p>IANA <a href=\"https://www.iana.org/domains/root/db/$TLD.html\">Delegation Record</a>";
+}
+
 if ($whoisDelegated) {
-	$whoisMessage = "<p>Delegated to: $whoisDelegated";
+	$whoisMessage .= "<br>\n  Delegated to: $whoisDelegated";
 }
 if ($whoisTechnical) {
-	$whoisMessage .= "<br>\nRegistry: $whoisTechnical";
+	$whoisMessage .= "<br>\n  Registry: $whoisTechnical";
 }
 if ($registryUrl) {
-	$whoisMessage .= "<br>\nLink: <a href=\"$registryUrl\">$registryUrl</a>";
+	$whoisMessage .= "<br>\n  Link: <a href=\"$registryUrl\">$registryUrl</a>";
 }
 if ($created) {
-	$whoisMessage .= "<br>\nCreated: $created";
+	$whoisMessage .= "<br>\n  Created: $created";
 }
-if ($whoisMessage) {
-	$whoisMessage .= "</p>";
-}
+$whoisMessage .= "\n</p>\n";
 
 open($rh, "<", "${OUTDIR}/tmpl") or die "Unable to open ${OUTDIR}/tmpl: $!";
 open($wh, ">", "${OUTDIR}/index.html") or die "Unable to open ${OUTDIR}/index.html: $!";
