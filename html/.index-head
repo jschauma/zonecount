@@ -24,14 +24,7 @@
      files</a> as well as the zone files or the various
      statistics that are available
      <a href="https://github.com/jschauma/tld-zoneinfo">for
-     some of the ccTLDs</a>.  (See <a
-     href="/blog/tldstats.html">this page</a> for a
-     little bit more background information.)</p>
-
-  <p>Some of those stats are not updated daily, but
-     only refreshed periodically; other times, jumps in the
-     domain counts might be explained by data processing
-     errors on my part.</p>
+     some of the ccTLDs</a>.</p>
 
   <p>Note: the data provided here is offered without
      any promise of accuracy or suitability for any
