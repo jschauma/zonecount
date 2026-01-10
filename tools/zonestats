@@ -664,7 +664,7 @@ fetchByCount() {
 	verbose "by and xn--90ais (name count only)..." 2
 
 	count=$(curl -s -X POST --data-raw '{"type":"total"}' 	\
-		'https://whois.cctld.by/weekstat' |		\
+		'https://whois.cctld.by/dailystat' |		\
 		jq '.data[].count' | tail -2 | tr '\n' ' ')
 
 	if ! skipDomain "by" && isNumber "${count%% *}" "by"; then
