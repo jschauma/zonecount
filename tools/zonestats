@@ -48,7 +48,8 @@
 # USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set -eu
+#set -eu
+set -u
 umask 077
 
 export XZ_DEFAULTS="--memlimit=225MiB"
@@ -102,6 +103,7 @@ be.
 bf.
 bn.
 br.
+by.
 ca.
 ci.
 cl.
@@ -170,6 +172,7 @@ uk.
 uy.
 uz.
 vn.
+xn--90ais.
 xn--fiqs8s.
 za."
 
@@ -205,9 +208,9 @@ SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
 
 ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw by bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sl sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
+GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sl sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
 
-NOFILL_DOMAINS="cn ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
+NOFILL_DOMAINS="cn dk ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
 DEFAULT_IFS=" 	
 "
@@ -256,7 +259,6 @@ axfr() {
 		fi
 	fi
 
-	set +e
 	dig ${keyfile:+-k} ${keyfile} +noall +answer @${ns} ${subdomain:+${subdomain}.}${domain} AXFR 2>/dev/null | \
 		xz -q -9 > ${ZONESDIR}/${out}.not
 	if [ $? -eq 0 ]; then
@@ -276,7 +278,6 @@ axfr() {
 		fi
 		rm -f ${TDIR}/[12]
 	fi
-	set -e
 	rm -f ${ZONESDIR}/${out}.not
 }
 
@@ -657,6 +658,23 @@ fetchBrCount() {
 	fi
 }
 
+fetchByCount() {
+	local count
+
+	verbose "by and xn--90ais (name count only)..." 2
+
+	count=$(curl -s -X POST --data-raw '{"type":"total"}' 	\
+		'https://whois.cctld.by/weekstat' |		\
+		jq '.data[].count' | tail -2 | tr '\n' ' ')
+
+	if ! skipDomain "by" && isNumber "${count%% *}" "by"; then
+		echo ${DATE} ${count%% *} >> ${COUNTDIR}/by
+	fi
+	if ! skipDomain "xn--90ais" && isNumber "${count#* }" "xn--90ais"; then
+		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--90ais
+	fi
+}
+
 fetchCaCount() {
 	local count
 
@@ -728,7 +746,7 @@ fetchCctlds() {
 		fetchSk
 	fi
 # disabled 2024-02-15; no more access?
-#	fetchUs
+	fetchUs
 }
 
 fetchCiCount() {
@@ -1858,9 +1876,6 @@ fetchStats() {
 	local fn=""
 	verbose "Fetching stats from websites..."
 
-	# some of these may fail, but let's try them all
-	set +e
-
 	if [ ${FORCE} -lt 2 ]; then
 		fetchComAndNetCount
 		if ! skipDomain "nu"; then
@@ -1884,7 +1899,6 @@ fetchStats() {
 			eval ${fn}
 		fi
 	done
-	set -e
 }
 
 fetchSuCount() {
@@ -1915,7 +1929,7 @@ fetchSvCount() {
 
 fillTopTen() {
 	local count n sum
-	local data labels
+	local data datasets labels
 	local toptencount percent total
 
 	verbose "Creating topten.html..." 3
@@ -1989,7 +2003,6 @@ EOF
 
 generateHTML() {
 	verbose "Generating HTML and graphs..."
-	local v=""
 	local percent=0
 	local grandTotal=0
 	local numExtra numFound numGuessed numMissing numTLDs numValid
@@ -2066,9 +2079,8 @@ EOF
 	fillTopTen
 
 	cat >>${HTMLDIR}/.index-middle <<EOF
-  <p><em>Note</em>: the top ten only accounts for TLDs for which data
-     is available (as shown below, some ccTLDs data is missing, and other data
-     is derived from external sources).</p>
+  <p>A line graph of the top ten TLDs in comparison can be found
+    <a href="topten-linechart.html">here</a>.</p>
 
   <p>You can find all TLDs for which data is available sorted by number
      of domains <a href="all.html">here</a>.</p>
@@ -2119,12 +2131,41 @@ EOF
 	
 	cat ${HTMLDIR}/.index-* > ${HTMLDIR}/index.html
 
-	verbose "Syncing into docroot..." 2
-	if [ ${VERBOSITY} -gt 2 ]; then
-		v="v"
-	fi
-	rsync -a${v} ${HTMLDIR}/. /htdocs/netmeister.org/tldstats/.
-	chmod -R a+rX /htdocs/netmeister.org/tldstats/
+	generateTopTenLines
+}
+
+generateTopTenLines() {
+	local func
+
+	verbose "Generating Top Ten Lines..." 2
+
+	oIFS="${IFS}"
+	IFS="
+"
+	cat ${HTMLDIR}/.topten-linechart-head > ${HTMLDIR}/topten-linechart.html
+	cat ${HTMLDIR}/.topten-linechartjs-head > ${HTMLDIR}/topten-linechart.js
+	for d in $(head ${COUNTDIR}/.all-sorted | awk '{print $NF}'); do
+		func="thinData(data_${d}.data)"
+		if [ x"${d}" = x"cn" ] || [ x"${d}" = x"uk" ]; then
+			func="filterFromDate(data_${d}.data)"
+		elif [ x"${d}" = x"ru" ]; then
+			func="thinData(filterFromDate(data_${d}.data))"
+		fi
+		cat >>${HTMLDIR}/topten-linechart.js <<EOF 
+       {
+        data: ${func},
+        label: '.${d}',
+        fill: false,
+        tension: 0.1
+       },
+EOF
+		cat >>${HTMLDIR}/topten-linechart.html <<EOF 
+  <script src="/tldstats/${d}/${d}.js"></script>
+EOF
+	done
+	cat ${HTMLDIR}/.topten-linechartjs-tail >> ${HTMLDIR}/topten-linechart.js
+	cat ${HTMLDIR}/.topten-linechart-tail >> ${HTMLDIR}/topten-linechart.html
+	IFS="${oIFS}"
 }
 
 gitCommit() {
@@ -2199,7 +2240,6 @@ ldnsWalk() {
 	local tfile="$(mktemp -p ${TDIR})"
 
 	verbose "ldns-walk'ing ${domain}${ns:+ from ${ns}}..." 2
-	set +e
 	set -o pipefail
 #	ldns-walk ${ns} ${domain}. 2>/dev/null |		\
 #		egrep -i "^.*\.${domain}.[ 	]" |		\
@@ -2219,7 +2259,6 @@ ldnsWalk() {
 		awk '/ NS / { print $1}' |			\
 		xz -q -9  >> ${NAMESDIR}/${domain##*.}.xz
 	rm -f ${TDIR}/${tfile}
-	set -e
 	set +o pipefail
 }
 
@@ -2349,15 +2388,17 @@ printLinkTable() {
 
 	count=0
 	for f in ${files}; do
-		fill="true"
+#		fill="true"
+		fill="false"
 		guessed="false"
 		verbose "${f}..." 2
-		for nf in ${NOFILL_DOMAINS}; do
-			if [ "${f}" = "${nf}" ]; then
-				fill="false"
-				break
-			fi
-		done
+
+#		for nf in ${NOFILL_DOMAINS}; do
+#			if [ "${f}" = "${nf}" ]; then
+#				fill="false"
+#				break
+#			fi
+#		done
 		for g in ${GUESSED_DOMAINS}; do
 			if [ "${f}" = "${g}" ]; then
 				guessed="true"
@@ -2388,6 +2429,16 @@ skipDomain() {
 	fi
 
 	return 1
+}
+
+syncHTML() {
+	local v=""
+	verbose "Syncing into docroot..." 2
+	if [ ${VERBOSITY} -gt 2 ]; then
+		v="v"
+	fi
+	rsync -a${v} ${HTMLDIR}/. /htdocs/netmeister.org/tldstats/.
+	chmod -R a+rX /htdocs/netmeister.org/tldstats/
 }
 
 usage() {
@@ -2567,6 +2618,7 @@ fi
 if matchType "html"; then
 	checkTLDs
 	generateHTML
+	syncHTML
 fi
 
 if matchType "git"; then
