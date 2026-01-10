@@ -221,28 +221,9 @@ print $wh <<EOF
   ]
 }
 
-const ctx_${TLD} = document.getElementById('${TLD}');
-new Chart(ctx_${TLD}, {
-    type: 'line',
-    data: {
-      labels: data_${TLD}.labels,
-      datasets: [{
-        data: data_${TLD}.data,
-        label: '.${TLD}',
-        fill: false,
-        borderColor: 'rgb(0, 0, 255)',
-        tension: 0.1
-      }]
-    },
-    options: {
-      spanGaps: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }
-});
+if (typeof(createChart) === typeof(Function)) {
+  createChart('${TLD}', data_${TLD});
+}
 EOF
 ;
 close($wh);
@@ -269,7 +250,9 @@ my ($whoisDelegated, $whoisTechnical, $registryUrl, $created) = getWhois($TLD);
 
 my $whoisMessage = "";
 if ($TLD ne "all_tlds") {
-	$whoisMessage = "<p>IANA <a href=\"https://www.iana.org/domains/root/db/$TLD.html\">Delegation Record</a>";
+	my $tld = $TLD;
+	$tld =~ s/xn__/xn--/;
+	$whoisMessage = "<p>IANA <a href=\"https://www.iana.org/domains/root/db/$tld.html\">Delegation Record</a>";
 }
 
 if ($whoisDelegated) {
