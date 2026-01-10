@@ -1,0 +1,20 @@
+const MIN_DATE = 20230601;
+
+/* CN has many earlier dates that we want to skip */
+function filterFromDate(dataset) {
+  return dataset.filter(point => point.x >= MIN_DATE);
+}
+
+function thinData(data, step = 10) {
+  return data.filter((_, i, arr) =>
+    i % step === 0 || i === arr.length - 1
+  );
+}
+
+Chart.register(ChartDataLabels);
+
+const ctx_tt = document.getElementById('topten-linechart');
+new Chart(ctx_tt, {
+    type: 'line',
+    data: {
+      datasets: [

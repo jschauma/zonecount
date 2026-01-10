@@ -25,12 +25,6 @@
   <p>Last data point: ::LASTDATE:: ::LASTCOUNT::</p>
   <p>Last update: ::DATE::</p>
 
-  <p>Dips:
-    <ul>
-      <li>2023-09-20: removed NSEC records from count</li>
-    </ul>
-  </p>
-
   <hr class="noshade" style="width:100%;">
   <small>
   [<a href="/index.html">homepage</a>]&nbsp;
@@ -42,6 +36,7 @@
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
+  <script src="../tldstats.js"></script>
   <script src="./::TLD::.js"></script>
   </body>
 </html>

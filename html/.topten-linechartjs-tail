@@ -1,0 +1,54 @@
+      ]
+    },
+    options: {
+      spanGaps: true,
+      scales: {
+        x: {
+          type: 'time',
+          time: {
+            parser: 'yyyyMMdd',
+            unit: 'day',
+            displayFormats: {
+              day: 'yyyy-MM-dd'
+            }
+          }
+        },
+        y: {
+          type: 'logarithmic'
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        datalabels: {
+          align: 'top',
+          anchor: 'start',
+          font: {
+            weight: 'bold',
+            size: 24
+          },
+          formatter: (value, context) => {
+            const meta = context.chart.getDatasetMeta(context.datasetIndex);
+            if (context.dataIndex == 0) {
+              return context.dataset.label;
+            }
+            return null;
+          },
+          color: context => context.dataset.borderColor
+        },
+        tooltip: {
+          callbacks: {
+            title: function(ctx) {
+              const date = new Date(ctx[0].parsed.x);
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            }
+          }
+        }
+      }
+    }
+  }
+);

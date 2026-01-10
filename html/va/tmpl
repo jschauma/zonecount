@@ -43,6 +43,7 @@ href="https://lists.dns-oarc.net/pipermail/dns-operations/2024-December/022734.h
   <hr class="noshade" style="width:100%;">
 
   <script src="../chart.js"></script>
+  <script src="../tldstats.js"></script>
   <script src="./::TLD::.js"></script>
   </body>
 </html>
