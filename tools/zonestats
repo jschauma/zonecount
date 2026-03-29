@@ -208,7 +208,7 @@ SUBDOMAINS_NI="biz co com edu gob info int mil net nom org"
 
 ICANN_STATS="moscow shaw voting xn--80adxhks xn--g2xx48c xn--kput3i xn--mxtq1m xn--ses554g"
 
-GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sl sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--90ais xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
+GUESSED_DOMAINS="ac ad af ag ai al ao aq as aw bb bg bh bi bj bm bo bs bw bz cc cf cg ck cm co cr cu cx dj dm edu eg et fk fm ga gd gf gg gh gi gl gm gq gr gs gu gw gy hm hn im in int io iq je jm kh ki km kn kp kw ky la lc ls lv ly me mg mh mil ml mm mn mo mq mr ms mt mu mv mz na ne nf np nr om pa pf pg ph pk pm pn post ps pw py qa re ro rw sb sc sd sh sl sm sn so sr ss st sx sy sz tc td tf tg tj tk tl tm to tt tv ug va vc vg vi vu wf ws xn--45brj9c xn--90ae xn--clchc0ea0b2g2a9gcd xn--d1alf xn--fiqz9s xn--fpcrj9c3d xn--gecrj9c xn--h2brj9c xn--kprw13d xn--mgb9awbf xn--mgbaam7a8h xn--mgbbh1a71e xn--mgbc0a9azcg xn--mgbpl2fh xn--node xn--ogbpf8fl xn--qxam xn--s9brj9c xn--wgbl6a xn--xkc2dl3a5ee0h xn--yfro4i67o ye yt zm zw"
 
 NOFILL_DOMAINS="cn dk ng nz taipei uk xn--fiqs8s ${ICANN_STATS} ${GUESSED_DOMAINS}"
 
@@ -438,8 +438,6 @@ countNamesFiles() {
 		echo ${DATE} ${n} >> ${COUNTDIR}/${domain}
 		tr -s ' ' <${COUNTDIR}/${domain} | sort -u > ${TDIR}/f && \
 			mv ${TDIR}/f ${COUNTDIR}/${domain}
-
-		dedupeCountFile "${domain}"
 	done
 }
 
@@ -462,11 +460,14 @@ cleanup() {
 }
 
 
-dedupeCountFile() {
-	local f="${1}"
-	verbose "Deduping ${f}..." 3
+dedupeCountFiles() {
+	verbose "Deduping count files..." 2
 
-	<${COUNTDIR}/${f} awk '{
+	(
+	cd ${COUNTDIR}
+	for f in *; do
+		verbose "Deduping ${f}..." 3
+		<${f} awk '{
 			this=$2;
 			if (this != last) {
 				last=this;
@@ -483,6 +484,8 @@ dedupeCountFile() {
 		}
 		END { print }' > ${TDIR}/f && \
 			sort -n -u ${TDIR}/f > ${COUNTDIR}/${f}
+	done
+	)
 }
 
 excludeForced() {
@@ -509,7 +512,7 @@ fetchAeCount() {
 
 	count=$(curl -s https://tdra.gov.ae/aeda | \
 			grep -A1 '<h5 class="text-whitely-50 text-h6' | \
-			tail -1 | tr -d ',' | tr -d '\n' | tr -d ' ')
+			tail -1 | tr -d ',' | tr -d '[:space:]')
 
 	if isNumber "${count}" "ae"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ae
@@ -663,16 +666,19 @@ fetchByCount() {
 
 	verbose "by and xn--90ais (name count only)..." 2
 
-	count=$(curl -s -X POST --data-raw '{"type":"total"}' 	\
-		'https://whois.cctld.by/dailystat' |		\
-		jq '.data[].count' | tail -2 | tr '\n' ' ')
+	curl -s -X POST --data-raw '{"type":"total"}' 	\
+		'https://whois.cctld.by/dailystat' > ${TDIR}/by
 
-	if ! skipDomain "by" && isNumber "${count%% *}" "by"; then
-		echo ${DATE} ${count%% *} >> ${COUNTDIR}/by
+	count=$(<${TDIR}/by jq '.data[] | select(.zone=="BY").count')
+	if ! skipDomain "by" && isNumber "${count}" "by"; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/by
 	fi
-	if ! skipDomain "xn--90ais" && isNumber "${count#* }" "xn--90ais"; then
-		echo ${DATE} ${count#* } >> ${COUNTDIR}/xn--90ais
+	count=$(<${TDIR}/by jq '.data[] | select(.zone=="БЕЛ").count')
+	if ! skipDomain "xn--90ais" && isNumber "${count}" "xn--90ais"; then
+		echo ${DATE} ${count} >> ${COUNTDIR}/xn--90ais
 	fi
+
+	rm -f ${TDIR}/by
 }
 
 fetchCaCount() {
@@ -950,15 +956,14 @@ fetchEsCount() {
 	fi
 }
 
+
 fetchFiCount() {
-	local url="https://odata.domain.fi/OpenDomainData.svc/"
-	local link='Domains?$inlinecount=allpages'
+	local url='https://odata.domain.fi/odata/Domains/$count'
 	local count
 
 	verbose "fi (name count only)..." 2
 
-	count=$(curl -s -H 'Accept: application/json' "${url}/${link}" | \
-			jq -r '."odata.count"')
+	count=$(curl -s "${url}")
 
 	if isNumber "${count}" "fi"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/fi
@@ -1112,7 +1117,6 @@ fetchGuessedStats() {
 	done
 }
 
-# Broken as of 2026-01-04, no data for 2026 yet
 fetchHkCount() {
 	local count y
 
@@ -1354,13 +1358,18 @@ fetchJpCount() {
 	fi
 }
 
+# Cloudflare WAF
 fetchKeCount() {
 	local count
 
 	verbose "ke (name count only)..." 2
 
-	count=$(curl -s https://kenic.or.ke/ |			\
-		sed -n -e '/counter-nmber/ {s/.*data-to="\([0-9]*\)".*/\1/p; q;}')
+	count=$(curl -s https://kenic.or.ke/statistics/ |	\
+		sed -e 's/<\/div>/\n/g' | 			\
+		grep -A1 'Generic Domains' | 			\
+		sed -n -e 's/<p>\(.*\)<\/p>/\1/p' | 		\
+		tr -d ',')
+
 	if isNumber "${count}" "ke"; then
 		echo ${DATE} ${count} >> ${COUNTDIR}/ke
 	fi
@@ -1768,12 +1777,10 @@ fetchUkCount() {
 
 	verbose "uk (name count only)..." 2
 
-	count=$(curl -s "https://www.nominet.uk/news/reports-statistics/uk-register-statistics-${DATE_Y}/" | \
-			grep total-domains-under-management-at-end-of-month |	\
-			perl -pe 's/<\/section>/\n/' | \
-			head -1 | \
-			perl -pe 's|.*class="Third-level">([0-9,]+)</td><td .*?class="Second-level">([0-9,]+)</td></tr></tbody>.*|$1 $2|' | \
-			tr -d ',')
+	count=$(curl -s "https://nominet.uk/reports-and-statistics/" | \
+			grep -m 1 "Third-level" | \
+			sed -n -e 's/.*Third-level<.*"center">\([0-9,]*\).*"center">\([0-9,]*\).*/\1+\2/p' | \
+			tr -d ',' | bc)
 
 	if isNumber "${count}" "uk"; then
 		count=$(echo $count | tr ' ' '+' | bc)
@@ -2611,6 +2618,7 @@ fi
 if matchType "counts"; then
 	checkTLDs
 	countNamesFiles
+	dedupeCountFiles
 	countTotal
 	checkCountFiles
 fi
