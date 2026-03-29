@@ -751,7 +751,6 @@ fetchCctlds() {
 	if ! skipDomain "sk"; then
 		fetchSk
 	fi
-# disabled 2024-02-15; no more access?
 	fetchUs
 }
 
